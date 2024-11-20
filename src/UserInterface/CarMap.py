@@ -67,6 +67,11 @@ class CarMap:
 
         self.carMap_blueprint.add_url_rule("", "home_car_map", view_func=home_car_map)
 
+        @self._sio.on('window_loaded')
+        def __start_scoreboard_loop(sid):
+            self.__run_async_task(self.__emit_scoreboard())
+    
+
     def get_blueprint(self) -> Blueprint:
         """
         Get the Blueprint object associated with the instance.
@@ -130,4 +135,17 @@ class CarMap:
         """
         asyncio.create_task(task)
         # TODO: Log error, if the coroutine doesn't end successfully
-        return
+        return    
+
+    async def __emit_scoreboard(self) -> None:
+        while True:
+            scoreboard = self.__create_table()
+            if scoreboard is not None:
+                await self._sio.emit('update_scoreboard', scoreboard)
+            await self._sio.sleep(1)
+
+    def __create_table(self) -> List[Dict[str, int]]:
+        drivers = self._environment_manager.get_drivers()
+        if drivers.__len__() != 0:
+            return [{"Player-Id": d.get_player_id(), "Score": d.get_score()} for d in drivers]
+        return None
