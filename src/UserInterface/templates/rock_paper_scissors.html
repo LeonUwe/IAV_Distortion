@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schere-Stein-Papier</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #8904B1, #1e3c72);
+            color: white;
+        }
+        .game-container {
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .game-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .choices {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .choice {
+            font-size: 3rem;
+            cursor: pointer;
+            padding: 10px;
+            transition: transform 0.2s, background-color 0.3s;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .choice:hover {
+            transform: scale(1.2);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .result {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-title">Schere-Stein-Papier</div>
+    <div class="choices">
+        <div class="choice" id="rock">🪨</div>
+        <div class="choice" id="paper">📄</div>
+        <div class="choice" id="scissors">✂️</div>
+    </div>
+    <div class="result" id="result">Wähle ein Symbol!</div>
+</div>
+<script>
+    const resultDisplay = document.getElementById("result");
+    const choices = document.querySelectorAll(".choice");
+
+    choices.forEach(choice => {
+        choice.addEventListener("click", () => {
+            const player1Choice = choice.id;
+            const player2Choice = ["rock", "paper", "scissors"][Math.floor(Math.random() * 3)];
+
+            fetch('/rock_paper_scissors/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ player1: player1Choice, player2: player2Choice })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    resultDisplay.innerText = data.result;
+                });
+        });
+    });
+</script>
+</body>
+</html>
