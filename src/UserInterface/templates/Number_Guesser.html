@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guesser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        #message {
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Number Guesser</h1>
+    <div id="join">
+        <input type="text" id="player_id" placeholder="Spieler-ID eingeben">
+        <button onclick="joinGame()">Spiel beitreten</button>
+    </div>
+
+    <div id="set-number" class="hidden">
+        <input type="number" id="target_number" min="1" max="10" placeholder="Zahl (1-10)">
+        <button onclick="setNumber()">Zahl setzen</button>
+    </div>
+
+    <div id="guess-number" class="hidden">
+        <input type="number" id="guess" min="1" max="10" placeholder="Zahl raten">
+        <button onclick="guessNumber()">Raten</button>
+    </div>
+
+    <div id="message"></div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        let playerId = null;
+
+        function joinGame() {
+            playerId = document.getElementById('player_id').value.trim();
+            if (!playerId) {
+                displayMessage("Bitte eine Spieler-ID eingeben.");
+                return;
+            }
+            socket.emit('join_game', { player_id: playerId });
+        }
+
+        function setNumber() {
+            const targetNumber = parseInt(document.getElementById('target_number').value, 10);
+            socket.emit('set_number', { number: targetNumber });
+        }
+
+        function guessNumber() {
+            const guess = parseInt(document.getElementById('guess').value, 10);
+            socket.emit('guess_number', { guess: guess });
+        }
+
+        function displayMessage(msg) {
+            document.getElementById('message').textContent = msg;
+        }
+
+        socket.on('player_joined', data => {
+            displayMessage(`Spieler ${data.player_id} ist beigetreten.`);
+            if (data.player_id === playerId && playerId === socket.id) {
+                document.getElementById('join').classList.add('hidden');
+            }
+        });
+
+        socket.on('ready', data => {
+            displayMessage('Spieler bereit! Spieler 1 setzt die Zahl.');
+            if (data.players[0] === playerId) {
+                document.getElementById('set-number').classList.remove('hidden');
+            } else {
+                displayMessage('Warte auf Spieler 1, um die Zahl zu setzen.');
+            }
+        });
+
+        socket.on('number_set', () => {
+            displayMessage('Zahl wurde gesetzt! Spieler 2 darf jetzt raten.');
+            document.getElementById('set-number').classList.add('hidden');
+            if (playerId !== data.players[0]) {
+                document.getElementById('guess-number').classList.remove('hidden');
+            }
+        });
+
+        socket.on('hint', data => {
+            displayMessage(`Hinweis: ${data.hint}`);
+        });
+
+        socket.on('winner', data => {
+            displayMessage(data.message);
+            document.getElementById('guess-number').classList.add('hidden');
+        });
+
+        socket.on('game_over', data => {
+            displayMessage(data.message);
+            document.getElementById('guess-number').classList.add('hidden');
+        });
+
+        socket.on('error', data => {
+            displayMessage(data.message);
+        });
+    </script>
+</body>
+</html>
