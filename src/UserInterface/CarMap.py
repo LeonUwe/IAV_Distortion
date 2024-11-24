@@ -1,3 +1,4 @@
+import logging
 from quart import Blueprint, render_template
 from typing import Any, Coroutine, List, Dict
 
@@ -10,6 +11,9 @@ from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 
 from DataModel.Vehicle import Vehicle
 from Items.Item import Item
+
+
+logger = logging.getLogger(__name__)
 
 
 class CarMap:
@@ -138,10 +142,15 @@ class CarMap:
         return    
 
     async def __emit_scoreboard(self) -> None:
+        scoreboard_before = [{"Player-Id": "", "Score":0}]
         while True:
             scoreboard = self.__create_table()
             if scoreboard is not None:
                 await self._sio.emit('update_scoreboard', scoreboard)
+                if scoreboard != scoreboard_before:
+                    logger.info(scoreboard)
+                    scoreboard_before = scoreboard
+                
             await self._sio.sleep(1)
 
     def __create_table(self) -> List[Dict[str, int]]:
