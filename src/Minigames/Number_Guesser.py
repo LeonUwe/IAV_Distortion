@@ -1,81 +1,70 @@
-from quart import Blueprint
-from socketio import AsyncServer
-import asyncio
+import random
+
 
 class Number_Guesser:
-    def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
-        self._sio = sio
-        self._blueprint = blueprint
-        self._name = name
-        self._players = []
-        self._target_number = None
-        self._max_tries = 3
-        self._current_try = 0
+    def __init__(self):
+        self.target_number = None
+        self.max_tries = 3
+        self.players = []
 
-        @self._sio.on('join_game')
-        async def on_join_game(sid: str, data):
-            player_id = data['player_id']
-            if len(self._players) < 2:
-                self._players.append(player_id)
-                await self._sio.emit('player_joined', {'player_id': player_id}, room=sid)
+    def description(self) -> str:
+        """Returns a brief description of the game."""
+        return (
+            "'Number Guesser' Game:\n"
+            "The first player chooses a number between 1 and 10.\n"
+            "The second player has three attempts to guess the number.\n"
+            "After each wrong attempt, they will receive a hint ('higher' or 'lower').\n"
+            "If the second player guesses correctly, they win. Otherwise, they lose after using all attempts."
+        )
 
-                if len(self._players) == 2:
-                    await self._sio.emit('ready', {'players': self._players}, room="Number_Guesser")
-            else:
-                await self._sio.emit('game_full', {'message': 'Spiel ist bereits voll.'}, room=sid)
+    def set_players(self, *players: str):
+        """Sets the players for the game."""
+        if len(players) != 2:
+            raise ValueError("There must be exactly two players.")
+        self.players = players
 
-        @self._sio.on('set_number')
-        async def set_number(sid: str, data):
-            if sid != self._players[0]:
-                await self._sio.emit('error', {'message': 'Nur der erste Spieler kann die Zahl setzen.'}, room=sid)
-                return
+    def play(self) -> str:
+        """Main game logic."""
+        if len(self.players) != 2:
+            raise ValueError("Two players must be set before starting the game.")
 
+        # Player 1 chooses the target number
+        while True:
             try:
-                number = int(data['number'])
-                if not (1 <= number <= 10):
-                    await self._sio.emit('error', {'message': 'Die Zahl muss zwischen 1 und 10 liegen.'}, room=sid)
-                    return
-
-                self._target_number = number
-                await self._sio.emit('number_set', {'message': 'Zahl wurde gesetzt!'}, room="Number_Guesser")
-            except ValueError:
-                await self._sio.emit('error', {'message': 'Ungültige Eingabe.'}, room=sid)
-
-        @self._sio.on('guess_number')
-        async def guess_number(sid: str, data):
-            if sid != self._players[1]:
-                await self._sio.emit('error', {'message': 'Nur der zweite Spieler kann raten.'}, room=sid)
-                return
-
-            if self._current_try >= self._max_tries:
-                await self._sio.emit('game_over', {'message': 'Keine Versuche mehr übrig.'}, room="Number_Guesser")
-                return
-
-            try:
-                guess = int(data['guess'])
-                self._current_try += 1
-
-                if guess < self._target_number:
-                    await self._sio.emit('hint', {'hint': 'zu niedrig'}, room=sid)
-                elif guess > self._target_number:
-                    await self._sio.emit('hint', {'hint': 'zu hoch'}, room=sid)
+                self.target_number = int(input(f"{self.players[0]}, choose a number between 1 and 10: "))
+                if 1 <= self.target_number <= 10:
+                    break
                 else:
-                    await self._sio.emit('winner', {'message': f'{self._players[1]} hat die Zahl erraten!'}, room="Number_Guesser")
-                    self.reset_game()
-                    return
-
-                if self._current_try == self._max_tries:
-                    await self._sio.emit(
-                        'game_over',
-                        {'message': f'Game Over! Die Zahl war {self._target_number}.'},
-                        room="Number_Guesser"
-                    )
-                    self.reset_game()
+                    print("The number must be between 1 and 10.")
             except ValueError:
-                await self._sio.emit('error', {'message': 'Ungültige Eingabe.'}, room=sid)
+                print("Please enter a valid number.")
 
-    def reset_game(self):
-        """Setzt den Spielzustand zurück."""
-        self._players.clear()
-        self._target_number = None
-        self._current_try = 0
+
+        # Player 2 tries to guess the number
+        for attempt in range(1, self.max_tries + 1):
+            try:
+                guess = int(input(f"{self.players[1]}, guess the number (Attempt {attempt} of {self.max_tries}): "))
+
+                if guess < self.target_number:
+                    print("Too low! Try again.")
+                elif guess > self.target_number:
+                    print("Too high! Try again.")
+                else:
+                    return f"{self.players[1]} guessed the number! You win!"
+            except ValueError:
+                print("Please enter a valid number.")
+
+        # Player 2 did not guess correctly
+        return f"{self.players[1]}, you lost. The correct number was {self.target_number}."
+
+
+if __name__ == "__main__":
+    game = Number_Guesser()
+    print(game.description())
+
+    # Set the players
+    game.set_players("Player 1", "Player 2")
+
+    # Start the game
+    result = game.play()
+    print(result)
