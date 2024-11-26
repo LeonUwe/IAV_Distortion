@@ -1,70 +1,43 @@
-import random
-
-
 class Number_Guesser:
     def __init__(self):
         self.target_number = None
         self.max_tries = 3
+        self.current_attempts = 0
+        self.active_player = None
         self.players = []
 
-    def description(self) -> str:
-        """Returns a brief description of the game."""
-        return (
-            "'Number Guesser' Game:\n"
-            "The first player chooses a number between 1 and 10.\n"
-            "The second player has three attempts to guess the number.\n"
-            "After each wrong attempt, they will receive a hint ('higher' or 'lower').\n"
-            "If the second player guesses correctly, they win. Otherwise, they lose after using all attempts."
-        )
+    def set_players(self, player1: str, player2: str):
+        """Set the two players for the game."""
+        self.players = [player1, player2]
 
-    def set_players(self, *players: str):
-        """Sets the players for the game."""
-        if len(players) != 2:
-            raise ValueError("There must be exactly two players.")
-        self.players = players
+    def set_number(self, player_id: str, number: int):
+        """Set the target number by the first player."""
+        if self.players[0] != player_id:
+            raise ValueError("Only the first player can set the number.")
+        if not (1 <= number <= 10):
+            raise ValueError("The number must be between 1 and 10.")
+        self.target_number = number
+        self.current_attempts = 0
+        self.active_player = self.players[1]
 
-    def play(self) -> str:
-        """Main game logic."""
-        if len(self.players) != 2:
-            raise ValueError("Two players must be set before starting the game.")
+    def guess_number(self, player_id: str, guess: int) -> str:
+        """Handle a guess by the second player."""
+        if self.players[1] != player_id:
+            raise ValueError("Only the second player can guess the number.")
+        if self.target_number is None:
+            raise ValueError("The target number has not been set yet.")
+        if not (1 <= guess <= 10):
+            raise ValueError("The guess must be between 1 and 10.")
 
-        # Player 1 chooses the target number
-        while True:
-            try:
-                self.target_number = int(input(f"{self.players[0]}, choose a number between 1 and 10: "))
-                if 1 <= self.target_number <= 10:
-                    break
-                else:
-                    print("The number must be between 1 and 10.")
-            except ValueError:
-                print("Please enter a valid number.")
+        self.current_attempts += 1
+        if guess == self.target_number:
+            return "correct"
+        if self.current_attempts >= self.max_tries:
+            return "lose"
+        return "higher" if guess < self.target_number else "lower"
 
-
-        # Player 2 tries to guess the number
-        for attempt in range(1, self.max_tries + 1):
-            try:
-                guess = int(input(f"{self.players[1]}, guess the number (Attempt {attempt} of {self.max_tries}): "))
-
-                if guess < self.target_number:
-                    print("Too low! Try again.")
-                elif guess > self.target_number:
-                    print("Too high! Try again.")
-                else:
-                    return f"{self.players[1]} guessed the number! You win!"
-            except ValueError:
-                print("Please enter a valid number.")
-
-        # Player 2 did not guess correctly
-        return f"{self.players[1]}, you lost. The correct number was {self.target_number}."
-
-
-if __name__ == "__main__":
-    game = Number_Guesser()
-    print(game.description())
-
-    # Set the players
-    game.set_players("Player 1", "Player 2")
-
-    # Start the game
-    result = game.play()
-    print(result)
+    def reset(self):
+        """Reset the game state."""
+        self.target_number = None
+        self.current_attempts = 0
+        self.active_player = None
