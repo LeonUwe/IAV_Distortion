@@ -187,7 +187,7 @@ class CarMap:
         return    
 
     async def __emit_scoreboard(self) -> None:
-        scoreboard_before = [{"Player-Id": "", "Score":0}]
+        scoreboard_before = [{"Player-Name": "", "Score":0}]
         while True:
             scoreboard = self.__create_table()
             if scoreboard is not None:
@@ -201,5 +201,5 @@ class CarMap:
     def __create_table(self) -> List[Dict[str, int]]:
         drivers = self._environment_manager.get_drivers()
         if drivers.__len__() != 0:
-            return [{"Player-Id": d.get_player_id(), "Score": d.get_score()} for d in drivers]
+            return [{"Player-Name": d.get_nickname(), "Score": d.get_score()} for d in drivers]
         return None

@@ -49,7 +49,7 @@
                     <table id="scoreboard">
                         <thead>
                             <tr>
-                                <th>Player-Id</th>
+                                <th>Player-Name</th>
                                 <th>Score</th>
                             </tr>
                         </thead>
@@ -463,7 +463,7 @@
                             const nameCell = document.createElement('td');
                             const scoreCell = document.createElement('td');
 
-                            nameCell.textContent = row["Player-Id"];
+                            nameCell.textContent = row["Player-Name"];
                             scoreCell.textContent = row["Score"];
 
                             tr.appendChild(nameCell);
