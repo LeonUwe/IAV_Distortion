@@ -32,6 +32,17 @@
         </div>
     </div>
 
+    <div class="overlay" id="nicknameOverlay">
+        <div class="info-box">
+            <div class="info-title">
+                <h2>Choose your nickname</h2>
+            </div>
+            <input type="text" id="textInputNickname">
+            <button class="close_tab_button" id="save_button"> Save</button>
+        </div>
+    </div>
+
+
     <div class="flexbox-container custom_header">
         <p class="header">Player {{player}}</p>
         <img id="logo" src="{{ url_for('static', filename='images/IAV-Logo-White.svg') }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/blank.png') }}'" >
@@ -133,6 +144,15 @@
             }
             else {
                 document.getElementById("infoBoxOverlay").style.display = "none";
+                document.getElementById("nicknameOverlay").style.display = "flex";
+                save_button = document.getElementById("save_button");
+
+                save_button.onclick = function(){
+                    if (document.getElementById("textInputNickname").value != "") {
+                        document.getElementById("nicknameOverlay").style.display = "none";
+                        socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                    }
+                };
 
                 var active_hacking_scenario = {{vehicle_information.active_hacking_scenario }};
                 show_hacked_info(active_hacking_scenario);
