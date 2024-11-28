@@ -11,13 +11,14 @@ from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 
 from Minigames.Minigame import Minigame
 from Minigames.Minigame_Test import Minigame_Test
+from Minigames.Number_Guesser_UI import Number_Guesser_UI
 
 logger = logging.getLogger(__name__)
 
 class Minigame_Controller:
 
     instance : "Minigame_Controller" = None
-    minigames : dict = {"Minigame_Test" : Minigame_Test}
+    minigames : dict = {"Number_Guesser" : Number_Guesser_UI, "Minigame_Test": Minigame_Test}
 
     def __init__(self, sio: AsyncServer = None, minigame_ui_blueprint : Blueprint = None):
         """

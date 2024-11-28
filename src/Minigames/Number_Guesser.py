@@ -3,12 +3,8 @@ class Number_Guesser:
         self.target_number = None
         self.max_tries = 3
         self.current_attempts = 0
-        self.active_player = None
+        self.ready_players = None
         self.players = []
-
-    def set_players(self, player1: str, player2: str):
-        """Set the two players for the game."""
-        self.players = [player1, player2]
 
     def set_number(self, player_id: str, number: int):
         """Set the target number by the first player."""
@@ -18,7 +14,7 @@ class Number_Guesser:
             raise ValueError("The number must be between 1 and 10.")
         self.target_number = number
         self.current_attempts = 0
-        self.active_player = self.players[1]
+        self.ready_players = self.players[1]
 
     def guess_number(self, player_id: str, guess: int) -> str:
         """Handle a guess by the second player."""
@@ -40,4 +36,6 @@ class Number_Guesser:
         """Reset the game state."""
         self.target_number = None
         self.current_attempts = 0
-        self.active_player = None
+        self.ready_players = None
+
+

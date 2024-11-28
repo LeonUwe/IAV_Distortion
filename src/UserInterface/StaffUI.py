@@ -672,8 +672,15 @@ class StaffUI:
                     'auto_drive_constantly' : new_settings.get('auto_drive_constantly') == 'on',
                     'driving_speed_while_playing': int(new_settings.get('driving_speed_while_playing')),
                     'games' : {
-                        'Minigame_Test' : new_settings.get('Minigame_Test') == 'on'
-                    }
+                        'Minigame_Test' : new_settings.get('Minigame_Test') == 'on',
+                        'Number_Guesser' : new_settings.get('Number_Guesser') == 'on'
+                    },
+                    'number-guesser':{
+                        'max-tries': int(new_settings.get('Number_Guesser_max_tries')),
+                        'current-attempts': int(new_settings.get('Number_Guesser_current_attempts')),
+                        'target-number': list(new_settings.get('Number_Guesser_target_number')),
+                        'guess-number': list(new_settings.get('Number_Guesser_guess_number'))
+                    },
                 }
             }
 

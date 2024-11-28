@@ -105,8 +105,14 @@
 		"auto_drive_constantly": true,
 		"driving_speed_while_playing": 30,
 		"games": {
-			"Minigame_Test": true
-		}
+			"Minigame_Test": false,
+			"Number_Guesser": true
+		},
+		"number-guesser": {
+				"max-tries" : 3,
+				"current-attempts" : 0,
+				"target-number": [1,10],
+				"guess-number" : [1,10]
 	},
 	"display_settings": {
 		"disp_cm_slogan_enabled": true,
@@ -138,4 +144,5 @@
 			"disp_cm_item_color": "#96e7ff"
 		}
 	}
+}
 }

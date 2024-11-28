@@ -1,55 +1,67 @@
-import asyncio
 from quart import Blueprint
+import asyncio
 from socketio import AsyncServer
-from .Number_Guesser import Number_Guesser
 from Minigames.Minigame import Minigame
+from .Number_Guesser import Number_Guesser
 
 class Number_Guesser_UI(Minigame):
     def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
         super().__init__(sio, blueprint, name)
-        self.logic = Number_Guesser()
+        self._game = None
 
-        # SocketIO Event Handlers
-        @self._sio.on("set_number")
-        async def handle_set_number(sid: str, data):
-            player_id = data.get("player_id")
-            number = data.get("number")
-            try:
-                self.logic.set_number(player_id, number)
-                await self._sio.emit("number_set", {"success": True}, to=sid)
-            except ValueError as e:
-                await self._sio.emit("number_set", {"success": False, "error": str(e)}, to=sid)
+        @self._sio.on('join_game')
+        async def on_join_game(sid: str, data):
+            player_id = data['player_id']
+            if len(self.get_players()) < 2 and player_id not in self.get_players():
+                self._players.append(player_id)
+                await self._sio.enter_room(sid, self.get_name())
+                await self._sio.emit('joined', {'player_id': player_id}, room=sid)
 
-        @self._sio.on("guess_number")
-        async def handle_guess_number(sid: str, data):
-            player_id = data.get("player_id")
-            guess = data.get("guess")
-            try:
-                result = self.logic.guess_number(player_id, guess)
-                response = {"result": result}
-                if result == "correct":
-                    response["winner"] = player_id
-                elif result == "lose":
-                    response["correct_number"] = self.logic.target_number
-                await self._sio.emit("guess_result", response, to=sid)
-            except ValueError as e:
-                await self._sio.emit("guess_result", {"error": str(e)}, to=sid)
+        @self._sio.on('set_number')
+        async def on_set_number(sid: str, data):
+            player_id = data['player_id']
+            if player_id == self._players[0]:  # Only the first player sets the number
+                number = data.get('number')
+                try:
+                    self._game.set_number(number)
+                    await self._sio.emit('number_set', {'status': 'success'}, room=self.get_name())
+                except ValueError as e:
+                    await self._sio.emit('number_set', {'status': 'error', 'message': str(e)}, room=sid)
 
-    async def _play(self, *players: str) -> str:
-        super()._play(*players)
-        self.logic.set_players(*players)
-        await self._sio.emit("game_started", {"players": players})
-        # Wait until game ends
-        while True:
-            if self.logic.target_number is None:
-                await asyncio.sleep(1)
-            else:
-                break
-        return self.logic.players[1]
+        @self._sio.on('guess_number')
+        async def on_guess_number(sid: str, data):
+            player_id = data['player_id']
+            if player_id == self._players[1]:  # Only the second player guesses
+                guess = data.get('guess')
+                try:
+                    result = self._game.guess_number(guess)
+                    await self._sio.emit('guess_result', {'result': result}, room=self.get_name())
+                    if result['status'] == 'won' or result['status'] == 'lost':
+                        self.cancel()
+                except ValueError as e:
+                    await self._sio.emit('guess_result', {'status': 'error', 'message': str(e)}, room=sid)
+
+    def set_players(self, *players: str) -> list[str]:
+        super().set_players()
+        if len(players) < 2:
+            print("Number_Guesser_UI: At least two players are required.")
+            return []
+        self._players = list(players[:2])
+        self._game = Number_Guesser()  # Initialize a new game instance
+        return self.get_players()
+
+    async def _play(self) -> str:
+        if not self._game:
+            return "Game not initialized."
+        await self._sio.emit('game_ready', room=self.get_name())
+        while not self._game.is_over():
+            await asyncio.sleep(1)  # Polling for game updates
+        return self._players[1] if self._game.is_winner() else self._players[0]
 
     def description(self) -> str:
-        super().description()
-        return (
-            "Number Guesser: Player 1 sets a number. "
-            "Player 2 has 3 attempts to guess the number."
-        )
+        return "A guessing game where one player sets a number, and the other tries to guess it within a limited number of attempts."
+
+    def cancel(self) -> None:
+        super().cancel()
+        self._game = None
+        asyncio.create_task(self._sio.emit('game_cancelled', room=self.get_name()))

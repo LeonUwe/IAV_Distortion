@@ -26,24 +26,30 @@
 
     
     <div class="overlay" id="infoBoxOverlay">
-        <div class="info-box">
+        <div class="info-box" id="description">
             <div class="info-title">
                 <h2>How to play</h2>
             </div>
             <p id="infoBoxContent"> A description of the Minigame should have appeared here...
             </p>
-            <!-- TODO: Send accept to backend -->
             <button class="close_tab_button" id="accept_button"> <span class="reload_symbol">&#10004;	</span> I understand the rules.</button>
         </div>
+        <div class="info-box" id="waiting-for-players" style="display: none;">
+            <div class="info-title">
+                <h2>Waiting</h2>
+            </div>
+            <p id="waitingInfoBox"> Waiting for others players to accept the rules.
+            </p>
+        </div>
     </div>
-    
+
     <div class="flexbox-container custom_header">
         <p class="header">Player {{player}}</p>
         <img id="logo" src="{{ url_for('static', filename='images/IAV-Logo-White.svg') }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/blank.png') }}'" >
     </div>
 
-    <div class="flexbox-container flexbox-controls" id="control">   
-        <div class="popup" id="popup" style="display: none; font-size: larger;"></div> 
+    <div class="flexbox-container flexbox-controls" id="control">
+        <div class="popup" id="popup" style="display: none; font-size: larger;"></div>
         <div id="current-Minigame" name="{{minigame}}"></div>
     </div>
 
@@ -51,7 +57,7 @@
     <script type="text/javascript" charset="utf-8">
         const minigame = "{{ minigame }}";
 
-        //Include the current Minigame's htm       
+        //Include the current Minigame's htm
         jQuery("#current-Minigame").load("{{ url_for('minigameUI_bp.' + minigame)}}", function(response, status){
             if(status === 'error'){
                 alert("Failed to load minigameUI_bp.Minigame_Test");
@@ -63,16 +69,16 @@
         window.onload = function() {
             accept_button = document.getElementById("accept_button");
             accept_button.onclick = function(){
-                document.getElementById("infoBoxOverlay").style.display = "none";
-                socket.emit('minigame_player_accept', {player: '{{player}}'});
-                
+                document.getElementById("description").style.display = "none";
+                socket.emit('minigame_player_accept', {player: '{{player}}', minigame: minigame});
+                document.getElementById('waiting-for-players').style.display = "block";
             };
         }
-       
+
         setInterval(function(){
             socket.emit('driver_heartbeat', {player: '{{ player }}'});
         }, {{ heartbeat_interval }});
-        
+
         console.log(minigame);
         socket.on('connect', () => {
             socket.emit('minigame_handle_connect', {player: '{{ player }}', minigame: minigame});
@@ -96,7 +102,7 @@
             if (Object.values(data).indexOf('{{ player }}') == -1)
                 return
             window.location = 'http://' + document.domain + ':' + location.port + '/driver';
-        }); 
+        });
 
         socket.on('minigame_winner', (data) => {
             if (data.minigame != minigame)
@@ -106,21 +112,32 @@
             document.getElementById("current-Minigame").style.display = 'none'
             if (data.winner == '{{ player }}'){
                 if (data.owner_of_physical_vehicle_at_start == '{{ player }}'){
-                    popup.innerText = "Du hast das Minispiel gewonnen. Du behälst dein echtes Auto."
+                    popup.innerText = "You won the minigame. You get to keep your physical car."
                 }else{
-                    popup.innerText = "Du hast das Minispiel gewonnen. Du übernimmst nun das Auto deines Gegners."
-                }      
+                    popup.innerText = "You won the minigame. You'll now take over your opponent's car."
+                }
             }else if(data.winner) {
                 if (data.owner_of_physical_vehicle_at_start == '{{ player }}'){
-                    popup.innerText = "Du hast das Minispiel verloren. Dein Gegner übernimmt jetzt dein Auto und du seins."
+                    popup.innerText = "You lost the minigame. Your oppononent will now take over your car and you theirs."
                 }else{
-                    popup.innerText = "Du hast das Minispiel verloren. Du behälst dein virtuelles Auto."
+                    popup.innerText = "You lost the minigame. You'll keep your virtual car."
                 }
             }else{
-                popup.innerText = "Das Minigspiel wurde abgebrochen. Es gibt keinen Gewinner."
+                popup.innerText = "The minigame was cancelled or there was a tie. There is no winner."
             }
             popup.style.display = 'block'
         })
+
+        socket.on('all_ready', (data) => {
+            if (data.minigame != minigame)
+                return;
+            console.log(data)
+            if (data.countdown == 0){
+                document.getElementById('infoBoxOverlay').style.display = 'none';
+            } else{
+                document.getElementById('waitingInfoBox').innerText = "Starting in " + data.countdown + " seconds.";
+            }
+        });
 
     </script>
 
