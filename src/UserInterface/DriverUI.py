@@ -196,6 +196,7 @@ class DriverUI:
             vehicle = self.get_vehicle_by_player(player=player)
             driver = self.environment_mng.get_driver_by_id(player_id=player)
             self.__run_async_task(self.__emit_driver_score(driver=driver))
+            self.__run_async_task(self.__emit_driver_has_no_nickname(driver=driver))
             if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
@@ -221,6 +222,10 @@ class DriverUI:
     def update_driving_data(self, driving_data: dict) -> None:
         self.__run_async_task(self.__emit_driving_data(driving_data))
         return
+
+    async def __emit_driver_has_no_nickname(self, driver: Driver) -> None:
+        if driver.get_nickname() == "":
+            await self._sio.emit('has_no_nickname', {'player':driver.get_player_id()})
 
     async def __emit_driving_data(self, driving_data: dict) -> None:
         await self._sio.emit('update_driving_data', driving_data)

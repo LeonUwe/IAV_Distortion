@@ -138,22 +138,13 @@
         <!-- loading window -->
         window.onload = function() {
             socket.emit('driver_active', {player: '{{player}}'});
+            document.getElementById("nicknameOverlay").style.display = "none";
             let playerExists = {{ player_exists | tojson }};
             if(!playerExists) {
                 document.getElementById("infoBoxOverlay").style.display = "flex";
             }
             else {
                 document.getElementById("infoBoxOverlay").style.display = "none";
-                document.getElementById("nicknameOverlay").style.display = "flex";
-                save_button = document.getElementById("save_button");
-
-                save_button.onclick = function(){
-                    if (document.getElementById("textInputNickname").value != "") {
-                        document.getElementById("nicknameOverlay").style.display = "none";
-                        socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
-                    }
-                };
-
                 var active_hacking_scenario = {{vehicle_information.active_hacking_scenario }};
                 show_hacked_info(active_hacking_scenario);
 
@@ -163,6 +154,18 @@
             }
         };
 
+        socket.on('has_no_nickname', function(data){   
+            if(data.player == '{{ player }}'){
+                document.getElementById("nicknameOverlay").style.display = "flex";
+                save_button = document.getElementById("save_button");
+                save_button.onclick = function(){
+                    if (document.getElementById("textInputNickname").value != "") {
+                        document.getElementById("nicknameOverlay").style.display = "none";
+                        socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                    }
+                };
+            }
+        });
 
         socket.on('connect', () => {
             socket.emit('handle_connect', {player: '{{ player }}'});
