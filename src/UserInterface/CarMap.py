@@ -154,6 +154,10 @@ class CarMap:
             await self._sio.sleep(1)
 
     def __create_table(self) -> List[Dict[str, int]]:
+        """
+        Creates table from all current players with their respective nicknames and scores.
+
+        """
         drivers = self._environment_manager.get_drivers()
         if drivers.__len__() != 0:
             return [{"Player-Name": d.get_nickname(), "Score": d.get_score()} for d in drivers]

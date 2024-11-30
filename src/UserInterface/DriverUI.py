@@ -264,6 +264,14 @@ class DriverUI:
         await self._sio.emit('update_player_score', {'score': driver.get_score().__round__(0), 'player': driver.get_player_id()})
 
     async def __in_physical_vehicle(self, driver: Driver) -> None:
+        """
+        Constantly increases a drivers score while he is in a physical vehicle.
+
+        Parameters
+        ----------
+        driver: Driver
+                    Driver instance of a specific player
+        """
         driver.set_is_in_physical_vehicle(True)
         while self.get_vehicle_by_player(player=driver.get_player_id()) is not None and "Virtual" in self.get_vehicle_by_player(player=driver.get_player_id()).get_vehicle_id():
             driver.increase_score(1)
