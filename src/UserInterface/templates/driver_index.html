@@ -137,8 +137,8 @@
 
         <!-- loading window -->
         window.onload = function() {
-            socket.emit('driver_active', {player: '{{player}}'});
             document.getElementById("nicknameOverlay").style.display = "none";
+            socket.emit('driver_active', {player: '{{player}}'});
             let playerExists = {{ player_exists | tojson }};
             if(!playerExists) {
                 document.getElementById("infoBoxOverlay").style.display = "flex";
@@ -164,6 +164,14 @@
                         socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
                     }
                 };
+                document.addEventListener("keydown", function(event) {
+                    if (event.key === "Enter") {
+                        if(document.getElementById("nicknameOverlay").style.display != "none") {
+                            document.getElementById("nicknameOverlay").style.display = "none";
+                            socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                        }
+                    }
+                });
             }
         });
 
