@@ -15,6 +15,8 @@ from Items.Item import Item
 from LocationService.Trigo import Position
 
 logger = logging.getLogger(__name__)
+
+
 class CarMap:
     """
         Provides the visualization of the virtual race track.
@@ -77,7 +79,6 @@ class CarMap:
             if not self._isRunning:
                 self._isRunning = True
                 self.__run_async_task(self.__emit_scoreboard())
-    
 
     def get_blueprint(self) -> Blueprint:
         """
@@ -189,10 +190,10 @@ class CarMap:
         """
         asyncio.create_task(task)
         # TODO: Log error, if the coroutine doesn't end successfully
-        return    
+        return
 
     async def __emit_scoreboard(self) -> None:
-        scoreboard_before = [{"Player-Name": "", "Score":0}]
+        scoreboard_before = [{"Player-Name": "", "Score": 0}]
         while True:
             scoreboard = self.__create_table()
             if scoreboard is not None:
@@ -200,7 +201,7 @@ class CarMap:
                 if scoreboard != scoreboard_before:
                     logger.info(scoreboard)
                     scoreboard_before = scoreboard
-                
+
             await self._sio.sleep(1)
 
     def __create_table(self) -> List[Dict[str, int]]:
