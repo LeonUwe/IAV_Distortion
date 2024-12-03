@@ -923,7 +923,7 @@ class EnvironmentManager:
             if p.get_player_id() == player_id:
                 return p
         return None
-    
+
     def get_drivers(self) -> List[Driver]:
         """
         Returns all Drivers of this session
