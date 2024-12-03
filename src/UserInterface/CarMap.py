@@ -208,6 +208,6 @@ class CarMap:
 
         """
         drivers = self._environment_manager.get_drivers()
-        if drivers.__len__() != 0:
+        if len(drivers) != 0:
             return [{"Player-Name": d.get_nickname(), "Score": d.get_score()} for d in drivers]
         return None
