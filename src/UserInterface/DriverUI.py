@@ -213,7 +213,7 @@ class DriverUI:
             if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
-        
+
         @self._sio.on('set_nickname')
         async def set_nickname(sid, data: dict) -> None:
             driver = self.environment_mng.get_driver_by_id(data.get("player"))
@@ -225,7 +225,7 @@ class DriverUI:
 
     async def __emit_driver_has_no_nickname(self, driver: Driver) -> None:
         if driver.get_nickname() == "":
-            await self._sio.emit('has_no_nickname', {'player':driver.get_player_id()})
+            await self._sio.emit('has_no_nickname', {'player': driver.get_player_id()})
 
     async def __emit_driving_data(self, driving_data: dict) -> None:
         await self._sio.emit('update_driving_data', driving_data)

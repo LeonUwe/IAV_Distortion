@@ -31,9 +31,9 @@ class Driver:
     
     def get_player_id(self) -> str:
         return self.__player
-    
+
     def get_nickname(self) -> str:
         return self.__nickname
-    
+
     def set_nickname(self, nickname) -> None:
         self.__nickname = nickname
