@@ -34,6 +34,8 @@ class CarMap:
 
         self._sio: AsyncServer = sio
 
+        self._isRunning: bool = False
+
         async def home_car_map():
             """
             Load car map page.
@@ -72,7 +74,9 @@ class CarMap:
 
         @self._sio.on('window_loaded')
         def __start_scoreboard_loop(sid):
-            self.__run_async_task(self.__emit_scoreboard())
+            if not self._isRunning:
+                self._isRunning = True
+                self.__run_async_task(self.__emit_scoreboard())
     
 
     def get_blueprint(self) -> Blueprint:
