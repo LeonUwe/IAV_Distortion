@@ -214,7 +214,7 @@ class DriverUI:
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
         
-        @self._sio.on('nickname')
+        @self._sio.on('set_nickname')
         async def set_nickname(sid, data: dict) -> None:
             driver = self.environment_mng.get_driver_by_id(data.get("player"))
             driver.set_nickname(data.get("nickname"))

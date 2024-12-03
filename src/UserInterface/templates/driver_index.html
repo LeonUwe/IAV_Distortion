@@ -161,14 +161,16 @@
                 save_button.onclick = function(){
                     if (document.getElementById("textInputNickname").value != "") {
                         document.getElementById("nicknameOverlay").style.display = "none";
-                        socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                        socket.emit('set_nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
                     }
                 };
                 document.addEventListener("keydown", function(event) {
                     if (event.key === "Enter") {
                         if(document.getElementById("nicknameOverlay").style.display != "none") {
-                            document.getElementById("nicknameOverlay").style.display = "none";
-                            socket.emit('nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                            if (document.getElementById("textInputNickname").value != "") {
+                                document.getElementById("nicknameOverlay").style.display = "none";
+                                socket.emit('set_nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                            }
                         }
                     }
                 });
