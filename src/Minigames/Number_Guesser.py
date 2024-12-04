@@ -1,7 +1,8 @@
 class Number_Guesser:
-    def __init__(self):
+    def __init__(self, max_tries: int, number_range: list[int, int]):
+        self.max_tries = max_tries
+        self.number_range = number_range
         self.target_number = None
-        self.max_tries = 3
         self.current_attempts = 0
         self.ready_players = None
         self.players = []
@@ -10,7 +11,7 @@ class Number_Guesser:
         """Set the target number by the first player."""
         if self.players[0] != player_id:
             raise ValueError("Only the first player can set the number.")
-        if not (1 <= number <= 10):
+        if not (self.number_range[0] <= number <= self.number_range[1]):
             raise ValueError("The number must be between 1 and 10.")
         self.target_number = number
         self.current_attempts = 0

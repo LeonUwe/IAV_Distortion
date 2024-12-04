@@ -27,8 +27,7 @@
 </head>
 <body>
     <h1>Number Guesser</h1>
-    <div id="join">
-        <input type="text" id="player_id" placeholder="Enter Player ID">
+    <div id="join" class="hidden">
         <button onclick="joinGame()">Join Game</button>
     </div>
 
@@ -46,13 +45,29 @@
 
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script>
-        const socket = io();
-        let playerId = null;
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Helper function to get a cookie by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Retrieve or generate playerId
+        let playerId = getCookie("playerId");
+        if (!playerId) {
+            playerId = crypto.randomUUID();
+            document.cookie = `playerId=${playerId}; path=/;`;
+        }
+
+        // Display join game button once playerId is ready
+        document.getElementById('join').classList.remove('hidden');
 
         function joinGame() {
-            playerId = document.getElementById('player_id').value.trim();
             if (!playerId) {
-                displayMessage("Please enter a Player ID.");
+                displayMessage("Failed to read or generate a Player ID.");
                 return;
             }
             socket.emit('join_game', { player_id: playerId });
@@ -60,13 +75,22 @@
 
         function setNumber() {
             const targetNumber = parseInt(document.getElementById('target_number').value, 10);
-            socket.emit('set_number', { number: targetNumber });
-        }
+            if (isNaN(targetNumber) || targetNumber < 1 || targetNumber > 10) {
+                displayMessage("Please enter a valid number between 1 and 10.");
+                return;
+    }
+            socket.emit('set_number', { player_id: playerId, number: targetNumber });
+}
 
         function guessNumber() {
             const guess = parseInt(document.getElementById('guess').value, 10);
-            socket.emit('guess_number', { guess: guess });
-        }
+            if (isNaN(guess) || guess < 1 || guess > 10) {
+                displayMessage("Please enter a valid guess between 1 and 10.");
+                return;
+    }
+            socket.emit('guess_number', { player_id: playerId, guess: guess });
+}
+
 
         function displayMessage(msg) {
             document.getElementById('message').textContent = msg;
@@ -74,7 +98,7 @@
 
         socket.on('player_joined', data => {
             displayMessage(`Player ${data.player_id} has joined.`);
-            if (data.player_id === playerId && playerId === socket.id) {
+            if (data.player_id === playerId) {
                 document.getElementById('join').classList.add('hidden');
             }
         });
@@ -88,7 +112,7 @@
             }
         });
 
-        socket.on('number_set', () => {
+        socket.on('number_set', data => {
             displayMessage('The number has been set! Player 2 can now guess.');
             document.getElementById('set-number').classList.add('hidden');
             if (playerId !== data.players[0]) {

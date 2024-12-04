@@ -110,9 +110,8 @@
 		},
 		"number-guesser": {
 				"max-tries" : 3,
-				"current-attempts" : 0,
-				"target-number": [1,10],
-				"guess-number" : [1,10]
+				"number_range": [1, 10]
+
 	},
 	"display_settings": {
 		"disp_cm_slogan_enabled": true,

@@ -8,6 +8,7 @@ class Number_Guesser_UI(Minigame):
     def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
         super().__init__(sio, blueprint, name)
         self._game = None
+        self.players = []
 
         @self._sio.on('join_game')
         async def on_join_game(sid: str, data):
@@ -36,8 +37,19 @@ class Number_Guesser_UI(Minigame):
                 try:
                     result = self._game.guess_number(guess)
                     await self._sio.emit('guess_result', {'result': result}, room=self.get_name())
-                    if result['status'] == 'won' or result['status'] == 'lost':
-                        self.cancel()
+                    if result['status'] == 'correct':
+                        # Notify all players of the winner
+                        winner_id = self._players[1]
+                        await self._sio.emit('game_finished', {'status': 'correct', 'winner': winner_id},
+                                             room=self.get_name())
+                    elif result['status'] == 'lose':
+                        # Notify all players of the game loss and reveal the correct number
+                        winner_id = self._players[0]
+                        await self._sio.emit('game_finished', {
+                            'status': 'lose',
+                            'winner': winner_id,
+                            'correct_number': self._game.target_number
+                        }, room=self.get_name())
                 except ValueError as e:
                     await self._sio.emit('guess_result', {'status': 'error', 'message': str(e)}, room=sid)
 
