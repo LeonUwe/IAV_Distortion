@@ -32,6 +32,12 @@
                     <span class="custom-checkbox"></span>    
                 </label>
             </div>
+            <div class="menu_item">
+                <label class="checkbox-container"> Reaction_Contest:
+                    <input type="checkbox" id="Reaction_Contest" name="Reaction_Contest">
+                    <span class="custom-checkbox"></span>    
+                </label>
+            </div>
         </div>
         <div id="specific_settings">
             <h2>Specific Settings</h2>
@@ -55,7 +61,7 @@
 
         // Checkboxes
         document.getElementById('auto_drive_constantly').checked = settings['minigame']['auto_drive_constantly']
-        let minigameCheckboxes = ['Minigame_Test', 'Tapping_Contest'] 
+        let minigameCheckboxes = ['Minigame_Test', 'Tapping_Contest', 'Reaction_Contest'] 
         minigameCheckboxes.forEach( (id) => {
             document.getElementById(id).checked = settings['minigame']['games'][id]
         })
