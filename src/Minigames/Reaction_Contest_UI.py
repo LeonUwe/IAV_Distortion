@@ -10,7 +10,6 @@ from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 class Reaction_Contest_UI(Minigame):
     def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
         super().__init__(sio, blueprint, name)
-        self._players: list[str] = []
         self._config_handler = ConfigurationHandler()
         try:
             self._min_length = int(
@@ -19,7 +18,7 @@ class Reaction_Contest_UI(Minigame):
         except Exception:
             self._min_length = 2
             print("Reaction_Contest_UI: No (proper) Configuration found for \
-                ['minigame']['reaction-contest']['min-length']. Using default value of 5 seconds.")
+                ['minigame']['reaction-contest']['min-length']. Using default value of 2 seconds.")
         try:
             self._max_length = int(
                 self._config_handler.get_configuration()
@@ -28,8 +27,14 @@ class Reaction_Contest_UI(Minigame):
             self._max_length = 5
             print("Reaction_Contest_UI: No (proper) Configuration found for \
                 ['minigame']['reaction-contest']['max-length']. Using default value of 5 seconds.")
-
-        self._game_length = random.randint(self._min_length, self._max_length)
+        try:
+            self._game_ends = int(
+                self._config_handler.get_configuration()
+                ['minigame']['reaction-contest']['game-ends'])
+        except Exception:
+            self._game_ends = 10
+            print("Reaction_Contest_UI: No (proper) Configuration found for \
+                ['minigame']['reaction-contest']['game-ends']. Using default value of 10 seconds.")
 
         @self._sio.on('join_game')
         async def on_join_game(sid: str, data):
@@ -45,15 +50,27 @@ class Reaction_Contest_UI(Minigame):
             self._game.press_button(player_index)
 
     def set_players(self, *players: str) -> list[str]:
-        self._players.clear()
-        self._players.extend(players[:2])
+        super().set_players()
+        if players is None or len(players) < 1:
+            print("Reaction_Contest_UI: The given player list is None or not long enough.")
+            return []
+        self._game_length = random.randint(self._min_length, self._max_length)
         self._game = Reaction_Contest(self._game_length)
-        return self._players
+
+        self._players.append(players[0])
+        if len(players) > 1:
+            self._players.append(players[1])
+        return self.get_players()
 
     async def _play(self) -> str:
         await self._start_game()
 
+        game_start_time = asyncio.get_event_loop().time()
         while self._game.get_winner() == -1:
+            if asyncio.get_event_loop().time() - game_start_time > self._game_ends:
+                await self._send_tie()
+                self._players.clear()
+                return ""
             await asyncio.sleep(0.1)
 
         winner_index = self._game.get_winner()
@@ -66,6 +83,10 @@ class Reaction_Contest_UI(Minigame):
         await self._sio.emit('start_game', {'game-length': self._game_length}, room="Reaction_Contest")
         await asyncio.sleep(self._game_length)
         await self._sio.emit('box_green', room="Reaction_Contest")
+        await asyncio.sleep(self._game_length)
+
+    async def _send_tie(self):
+        await self._sio.emit('tie', to="Reaction_Contest")
 
     def description(self) -> str:
         return "First player to click the green box wins!"

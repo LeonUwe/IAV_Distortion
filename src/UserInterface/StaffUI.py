@@ -680,6 +680,11 @@ class StaffUI:
                     'tapping-contest': {
                         'game-length': int(new_settings.get('Tapping_Contest_Game_length'))
                     },
+                     'reaction-contest': {
+                        'min-length': int(new_settings.get('Reaction_Contest_Min_length')),
+                        'max-length': int(new_settings.get('Reaction_Contest_Max_length')),
+                        'game-ends': int(new_settings.get('Reaction_Contest_Game_length'))
+                    },
                 }
             }
 
