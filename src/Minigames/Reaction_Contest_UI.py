@@ -69,4 +69,3 @@ class Reaction_Contest_UI(Minigame):
 
     def description(self) -> str:
         return "First player to click the green box wins!"
-        

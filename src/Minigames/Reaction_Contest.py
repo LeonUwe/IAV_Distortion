@@ -37,4 +37,3 @@ class Reaction_Contest():
         int: Number/Index of the winner [0-1]. -1 if no winner yet.
         """
         return self._winner
-        
