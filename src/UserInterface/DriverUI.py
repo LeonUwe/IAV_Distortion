@@ -205,7 +205,7 @@ class DriverUI:
             driver = self.environment_mng.get_driver_by_id(player_id=player)
             self.__run_async_task(self.__emit_driver_score(driver=driver))
             self.__run_async_task(self.__emit_driver_has_no_nickname(driver=driver))
-            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
 
@@ -247,7 +247,7 @@ class DriverUI:
             self.environment_mng.manage_car_switch_for(player, target_vehicle_id)
             driver = self.environment_mng.get_driver_by_id(player_id=player)
             self.__run_async_task(self.__emit_driver_score(driver=driver))
-            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
 
@@ -255,6 +255,9 @@ class DriverUI:
         async def set_nickname(sid, data: dict) -> None:
             driver = self.environment_mng.get_driver_by_id(data.get("player"))
             driver.set_nickname(data.get("nickname"))
+            vehicle = self.environment_mng.get_vehicle_by_player_id(data.get("player"))
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
+                self.__run_async_task(self.__in_physical_vehicle(driver))
 
     def update_driving_data(self, driving_data: dict) -> None:
         self.__run_async_task(self.__emit_driving_data(driving_data))
@@ -311,7 +314,7 @@ class DriverUI:
         """
         driver.set_is_in_physical_vehicle(True)
         while self.get_vehicle_by_player(player=driver.get_player_id()) is not None and \
-                "Virtual" not in self.get_vehicle_by_player(player=driver.get_player_id()).get_vehicle_id():
+                "Virtual"  in self.get_vehicle_by_player(player=driver.get_player_id()).get_vehicle_id():
             driver.increase_score(1)
             await self._sio.emit('update_player_score', {'score': driver.get_score(), 'player': driver.get_player_id()})
             await self._sio.sleep(1)
