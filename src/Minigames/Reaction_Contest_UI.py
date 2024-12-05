@@ -6,6 +6,7 @@ from Minigames.Minigame import Minigame
 from Minigames.Reaction_Contest import Reaction_Contest
 from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 
+
 class Reaction_Contest_UI(Minigame):
     def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
         super().__init__(sio, blueprint, name)
@@ -27,7 +28,7 @@ class Reaction_Contest_UI(Minigame):
             self._max_length = 5
             print("Reaction_Contest_UI: No (proper) Configuration found for \
                 ['minigame']['reaction-contest']['max-length']. Using default value of 5 seconds.")
-        
+
         self._game_length = random.randint(self._min_length, self._max_length)
 
         @self._sio.on('join_game')
@@ -68,3 +69,4 @@ class Reaction_Contest_UI(Minigame):
 
     def description(self) -> str:
         return "First player to click the green box wins!"
+        

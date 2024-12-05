@@ -1,5 +1,5 @@
 import time
-import random
+
 
 class Reaction_Contest():
     def __init__(self, game_length: int):
@@ -37,3 +37,4 @@ class Reaction_Contest():
         int: Number/Index of the winner [0-1]. -1 if no winner yet.
         """
         return self._winner
+        
