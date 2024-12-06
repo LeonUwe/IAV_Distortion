@@ -65,6 +65,9 @@ class Reaction_Contest_UI(Minigame):
     async def _play(self) -> str:
         await self._start_game()
 
+        if len(self._players) < 2:
+            asyncio.create_task(self._play_as_bot())
+
         game_start_time = asyncio.get_event_loop().time()
         while self._game.get_winner() == -1:
             if asyncio.get_event_loop().time() - game_start_time > self._game_ends:
@@ -74,7 +77,7 @@ class Reaction_Contest_UI(Minigame):
             await asyncio.sleep(0.1)
 
         winner_index = self._game.get_winner()
-        winner = self._players[winner_index]
+        winner = "bot" if winner_index == 1 else self._players[winner_index]
         self._players.clear()
         return winner
 
@@ -90,3 +93,16 @@ class Reaction_Contest_UI(Minigame):
 
     def description(self) -> str:
         return "First player to click the green box wins!"
+
+    async def _play_as_bot(self):
+        """
+        Simuliert einen zweiten Spieler, der nach dem Erscheinen des grünen Buttons klickt.
+        """
+        
+        while not self._game.is_box_green():
+            await asyncio.sleep(0.1)
+
+        delay = random.uniform(0, 1.5)
+        await asyncio.sleep(delay)
+
+        self._game.press_button(1)
