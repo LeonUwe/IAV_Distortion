@@ -1,44 +1,52 @@
-<!-- rock_paper_scissors.html -->
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Schere-Stein-Papier</title>
-    <!-- Socket.IO Client-Bibliothek einbinden -->
-    <script src="//cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <style>
-        /* Dein bestehendes CSS hier */
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock-Paper-Scissors</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
-<div class="game-container">
-    <!-- Dein bestehendes HTML hier -->
+<h1>Rock Paper Scissors</h1>
+<div id="status">Waiting for the game to start...</div>
+<div id="choices" style="display:none;">
+    <button onclick="sendChoice('rock')">Rock</button>
+    <button onclick="sendChoice('paper')">Paper</button>
+    <button onclick="sendChoice('scissors')">Scissors</button>
 </div>
+
+<div id="result"></div>
+
 <script>
-    const socket = io();
-    const playerId = '{{ player }}';
+    var socket = io();
+    var playerId = "{{ player_id }}"; // Stelle sicher, dass du hier eine Variable vom Server bekommst
 
     socket.emit('join_game', { player_id: playerId });
 
-    // Spiel starten
+    function sendChoice(choice) {
+        socket.emit('player_choice', { player_id: playerId, choice: choice });
+        document.getElementById('choices').style.display = 'none';
+        document.getElementById('status').textContent = 'Waiting for the other player...';
+    }
+
     socket.on('start_game', (data) => {
-        const gameLength = data['game_length'];
-        // Timer starten und dem Spieler erlauben, eine Auswahl zu treffen
+        document.getElementById('status').textContent = 'Choose your move within ' + data.time_limit + ' seconds!';
+        document.getElementById('choices').style.display = 'block';
     });
 
-    // Wenn der Spieler eine Auswahl trifft
-    choices.forEach(choice => {
-        choice.addEventListener("click", () => {
-            const playerChoice = choice.id;
-            socket.emit('make_choice', { player_id: playerId, choice: playerChoice });
-            resultDisplay.innerText = 'Warte auf den Gegner...';
-        });
-    });
-
-    // Ergebnis erhalten
-    socket.on('game_result', (data) => {
-        const result = data['result'];
-        // Ergebnis anzeigen
+    socket.on('end_game', (data) => {
+        var winner = data.winner;
+        if (winner === null) {
+            document.getElementById('result').textContent = 'No one chose in time - no winner!';
+        } else if (winner === 'draw') {
+            document.getElementById('result').textContent = 'It\'s a draw!';
+        } else if (winner === playerId) {
+            document.getElementById('result').textContent = 'You won!';
+        } else {
+            document.getElementById('result').textContent = 'You lost! Winner was: ' + winner;
+        }
+        document.getElementById('status').textContent = 'Game over!';
+        document.getElementById('choices').style.display = 'none';
     });
 </script>
 </body>
