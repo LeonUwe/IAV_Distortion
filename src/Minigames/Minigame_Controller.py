@@ -55,6 +55,7 @@ class Minigame_Controller:
 
         self._minigame_objects: dict = {}
         self._available_minigames: list[str] = []
+        self._scorepoints = 0
         for minigame in Minigame_Controller.minigames.keys():
             self._minigame_objects[minigame] = Minigame_Controller.minigames[minigame](sio, minigame_ui_blueprint)
             try:
@@ -65,6 +66,13 @@ class Minigame_Controller:
                     Using default value 0 ('not playable').")
 
         Minigame_Controller.instance = self
+
+    
+    def set_scorepoints(self, scorepoints: int) -> None:
+        self._scorepoints = scorepoints
+    
+    def get_scorepoints(self) -> int:
+        return self._scorepoints
 
     def set_available_minigames(self, available_minigames: list[str]):
         self._available_minigames.clear()
