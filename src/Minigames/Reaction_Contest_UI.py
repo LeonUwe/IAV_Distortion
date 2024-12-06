@@ -98,7 +98,7 @@ class Reaction_Contest_UI(Minigame):
         """
         Simuliert einen zweiten Spieler, der nach dem Erscheinen des grünen Buttons klickt.
         """
-        
+
         while not self._game.is_box_green():
             await asyncio.sleep(0.1)
 
