@@ -6,26 +6,29 @@ from Minigames.Tapping_Contest import Tapping_Contest
 from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 import random
 
+
 class Tapping_Contest_UI(Minigame):
     def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
         super().__init__(sio, blueprint, name)
         self._players: list[str] = []
         self._config_handler = ConfigurationHandler()
         try:
-            self._game_length = int(self._config_handler.get_configuration()['minigame']['tapping-contest']['game-length'])
+            self._game_length = int(
+                self._config_handler.get_configuration()
+                ['minigame']['tapping-contest']['game-length'])
         except Exception:
             self._game_length = 10
             print("Tapping_Contest_UI: No (proper) Configuration found for \
                 ['minigame']['tapping-contest']['game-length]. Using default value of 10 seconds.")
 
-        @self._sio.on('join_game')
+        @self._sio.on('Tapping_Contest_join')
         async def on_join_game(sid: str, data):
             player_id = data['player_id']
             if player_id in self._players:
                 await self._sio.enter_room(sid, "Tapping_Contest")
                 await self._sio.emit('joined', {'player_id': player_id}, room=player_id)
 
-        @self._sio.on('click')
+        @self._sio.on('Tapping_Contest_click')
         async def handle_click(sid: str, data):
             player_id = data['player_id']
             await self._record_click(player_id)
@@ -38,7 +41,9 @@ class Tapping_Contest_UI(Minigame):
 
         # Create game instance with current config
         try:
-            self._game_length = int(self._config_handler.get_configuration()['minigame']['tapping-contest']['game-length'])
+            self._game_length = int(
+                self._config_handler.get_configuration()
+                ['minigame']['tapping-contest']['game-length'])
         except Exception:
             self._game_length = 10
             print("Tapping_Contest_UI: No (proper) Configuration found for \
@@ -62,7 +67,7 @@ class Tapping_Contest_UI(Minigame):
         await asyncio.sleep(self._game_length)  # Game duration
 
         winner_index = self._game.get_winner()
-        while self._game.get_winner() == -1:
+        while winner_index == -1:
             winner_index = self._game.get_winner()
             await asyncio.sleep(1)
 
