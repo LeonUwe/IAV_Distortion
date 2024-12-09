@@ -245,6 +245,7 @@ class DriverUI:
 
             self.environment_mng.manage_car_switch_for(player, target_vehicle_id)
             driver = self.environment_mng.get_driver_by_id(player_id=player)
+            driver.increase_score(Minigame_Controller.get_instance().get_scorepoints())
             self.__run_async_task(self.__emit_driver_score(driver=driver))
             if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
                 self.__run_async_task(self.__in_physical_vehicle(driver))
