@@ -45,7 +45,7 @@
     var playerId = '{{ player }}';
 
     // Join game and send player ID to server
-    socket.emit('join_game', { player_id: playerId });
+    socket.emit('Reaction_Contess_join', { player_id: playerId });
 
     socket.on('start_game', (data) => {
       document.getElementById('status').textContent = 'Get ready...';
@@ -57,7 +57,7 @@
     });
 
     document.getElementById('reaction-box').addEventListener('click', () => {
-      socket.emit('click', { player_id: playerId });
+      socket.emit('Reaction_Contess_click', { player_id: playerId });
       document.getElementById('reaction-box').style.display = 'none';
     });
 

@@ -36,14 +36,14 @@ class Reaction_Contest_UI(Minigame):
             print("Reaction_Contest_UI: No (proper) Configuration found for \
                 ['minigame']['reaction-contest']['game-ends']. Using default value of 10 seconds.")
 
-        @self._sio.on('join_game')
+        @self._sio.on('Reaction_Contess_join')
         async def on_join_game(sid: str, data):
             player_id = data['player_id']
             if player_id in self._players:
                 await self._sio.enter_room(sid, "Reaction_Contest")
                 await self._sio.emit('joined', {'player_id': player_id}, room=player_id)
 
-        @self._sio.on('click')
+        @self._sio.on('Reaction_Contess_click')
         async def handle_click(sid: str, data):
             player_id = data['player_id']
             player_index = self._players.index(player_id)
@@ -77,7 +77,14 @@ class Reaction_Contest_UI(Minigame):
             await asyncio.sleep(0.1)
 
         winner_index = self._game.get_winner()
-        winner = "bot" if winner_index == 1 else self._players[winner_index]
+        if winner_index == -2:
+            # Tie
+            winner = ""
+        else:
+            if winner_index == 1 and len(self._players) < 2:
+                winner = "bot"
+            else:
+                winner = self._players[winner_index]
         self._players.clear()
         return winner
 
@@ -96,9 +103,8 @@ class Reaction_Contest_UI(Minigame):
 
     async def _play_as_bot(self):
         """
-        Simuliert einen zweiten Spieler, der nach dem Erscheinen des grünen Buttons klickt.
+        Simulates a second player.
         """
-
         while not self._game.is_box_green():
             await asyncio.sleep(0.1)
 
