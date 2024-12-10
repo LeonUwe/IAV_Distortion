@@ -93,7 +93,7 @@
         }
 
         socket.on('send_description', (data) => {
-            if (data.minigame != minigame)
+            if (data.minigame.toLowerCase() != minigame)
                 return;
 
             descriptionElement = document.getElementById("infoBoxContent");
