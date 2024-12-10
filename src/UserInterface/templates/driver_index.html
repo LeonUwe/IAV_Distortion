@@ -35,7 +35,7 @@
     <div class="overlay" id="nicknameOverlay">
         <div class="info-box">
             <div class="info-title">
-                <h2>Choose your nickname</h2>
+                <h3>Choose your nickname</h3>
             </div>
             <input type="text" id="textInputNickname">
             <button class="close_tab_button" id="save_button"> Save</button>
@@ -177,20 +177,29 @@
                 save_button = document.getElementById("save_button");
                 save_button.onclick = function(){
                     if (document.getElementById("textInputNickname").value != "") {
-                        document.getElementById("nicknameOverlay").style.display = "none";
-                        socket.emit('set_nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                        socket.emit('is_nickname_available', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
                     }
                 };
                 document.addEventListener("keydown", function(event) {
                     if (event.key === "Enter") {
                         if(document.getElementById("nicknameOverlay").style.display != "none") {
                             if (document.getElementById("textInputNickname").value != "") {
-                                document.getElementById("nicknameOverlay").style.display = "none";
-                                socket.emit('set_nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                                socket.emit('is_nickname_available', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
                             }
                         }
                     }
                 });
+            }
+        });
+
+        socket.on('nickname_available', function(data){
+            if(data.player == '{{ player }}') {
+                if(data.available == true) {
+                    document.getElementById("nicknameOverlay").style.display = "none";
+                    socket.emit('set_nickname', {player: '{{ player }}', nickname: document.getElementById("textInputNickname").value});
+                } else {
+                    document.querySelector('.info-title h3').textContent = 'Nickname not available, please choose another nickname!';
+                }
             }
         });
 
