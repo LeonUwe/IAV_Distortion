@@ -16,7 +16,6 @@ class Minigame:
             self._name = name.split(".")[-1]
         if "_UI" in name:
             self._name = self._name.removesuffix("_UI")
-        self._name = self._name.lower()
         self._players: list[str] = []
         self._ready_players: list[str] = []
         self._task = None
