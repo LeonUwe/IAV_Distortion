@@ -228,10 +228,14 @@ class DriverUI:
             if self.__has_hacking_protection(vehicle=target_vehicle):
                 return
             target_player = target_vehicle.get_player_id()
+            minigame_players = []
+            minigame_players.append(player)
+            if target_player is not None:
+                minigame_players.append(target_player)
 
             # Try to start Minigame
             minigame_task, minigame_object = Minigame_Controller.get_instance().\
-                play_random_available_minigame(player, target_player)
+                play_random_available_minigame(*minigame_players)
 
             if minigame_task is None:
                 logger.warning(f"DriverUI: The minigame for player {player} and player {target_player} could not be \
