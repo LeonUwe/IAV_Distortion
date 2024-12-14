@@ -12,6 +12,8 @@ from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
 from Minigames.Minigame import Minigame
 from Minigames.Minigame_Test import Minigame_Test
 from Minigames.Tapping_Contest_UI import Tapping_Contest_UI
+from Minigames.Reaction_Contest_UI import Reaction_Contest_UI
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,11 @@ logger = logging.getLogger(__name__)
 class Minigame_Controller:
 
     instance: "Minigame_Controller" = None
-    minigames: dict = {"Tapping_Contest": Tapping_Contest_UI, "Minigame_Test": Minigame_Test}
+    minigames: dict = {
+        "Tapping_Contest": Tapping_Contest_UI,
+        "Minigame_Test": Minigame_Test,
+        "Reaction_Contest": Reaction_Contest_UI,
+    }
 
     def __init__(self, sio: AsyncServer = None, minigame_ui_blueprint: Blueprint = None):
         """
@@ -216,7 +222,7 @@ class Minigame_Controller:
 
         self._available_minigames.remove(minigame)
 
-        running_game_task: asyncio.Task = asyncio.create_task(minigame_object.play(*players))
+        running_game_task: asyncio.Task = minigame_object.play(*players)
         running_game_task.add_done_callback(self._minigame_done_callback(minigame_object))
 
         self._minigame_start_callback(running_game_task, minigame_object)
