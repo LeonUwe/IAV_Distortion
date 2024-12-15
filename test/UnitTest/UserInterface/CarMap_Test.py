@@ -58,5 +58,5 @@ class TestVehicleProximity:
         self.car_map.check_virtual_vehicle_proximity("car1", {"x": 100, "y": 100})
 
         # Assert
-        assert not self.vehicle1.vehicle_in_proximity == "car2"
-        assert not self.vehicle2.vehicle_in_proximity == "car1"
+        assert self.vehicle1.vehicle_in_proximity is None
+        assert self.vehicle2.vehicle_in_proximity is None
