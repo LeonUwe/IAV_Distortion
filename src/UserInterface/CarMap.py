@@ -33,6 +33,47 @@ class CarMap:
 
         self._sio: AsyncServer = sio
 
+        try:
+            self.__proximity_range: int = int(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["proximity_timer"]["range"])
+        except KeyError:
+            logger.warning("No valid value for driver: proximity_timer/range in config_file. Using default "
+                           "value of 200")
+            self.__proximity_range = 200
+
+        try:
+            self.__can_virtual_cars_hack: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["cars_that_can_hack"]["virtuaL"])
+        except KeyError:
+            logger.warning("No valid value for driver: cars_that_can_hack/virtuaL in config_file. Using default "
+                           "value of true")
+            self.__can_virtual_cars_hack = True
+
+        try:
+            self.__can_physical_cars_hack: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["cars_that_can_hack"]["physical"])
+        except KeyError:
+            logger.warning("No valid value for driver: cars_that_can_hack/physical in config_file. Using default "
+                           "value of false")
+            self.__can_physical_cars_hack = False
+
+        try:
+            self.__can_virtual_cars_be_hacked: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["hackable_cars"]["virtuaL"])
+
+        except KeyError:
+            logger.warning("No valid value for driver: hackable_cars/virtuaL in config_file. Using default "
+                           "value of False")
+            self.__can_virtual_cars_be_hacked = False
+
+        try:
+            self.__can_physical_cars_be_hacked: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["hackable_cars"]["physical"])
+        except KeyError:
+            logger.warning("No valid value for driver: hackable_cars/physical in config_file. Using default "
+                           "value of True")
+            self.__can_physical_cars_be_hacked = True
+
         async def home_car_map():
             """
             Load car map page.
@@ -95,14 +136,13 @@ class CarMap:
         """
         data = {'car': vehicle_id, 'position': position, 'angle': angle}
         self.__run_async_task(self.__emit_car_position(data))
-
         if self._vehicles is not None:
             self.check_vehicle_proximity(vehicle_id, position)
         return
 
     def check_vehicle_proximity(self, vehicle_id: str, position: dict,) -> None:
         """
-        Checks if the given vehicle (vehicle_id) is a virtual vehicle and, if so, performs a proximity check.
+        Checks if the given vehicle (vehicle_id) can hack other cars and, if so, performs a proximity check.
 
         Parameters
         ----------
@@ -111,15 +151,20 @@ class CarMap:
         position : dict
             Dictionary containing the 'x' and 'y' coordinates of the vehicle's position in the simulation.
         """
-        for v in self._environment_manager._active_virtual_cars:
-            if v == vehicle_id:
-                self.check_virtual_vehicle_proximity(vehicle_id, position)
+        if self.__can_virtual_cars_hack is True:
+            for v in self._environment_manager._active_virtual_cars:
+                if v == vehicle_id:
+                    self.check_hack_vehicle_proximity(vehicle_id, position)
+        if self.__can_physical_cars_hack is True:
+            for v in self._environment_manager._active_physical_cars:
+                if v == vehicle_id:
+                    self.check_hack_vehicle_proximity(vehicle_id, position)
         return
 
-    def check_virtual_vehicle_proximity(self, vehicle_id: str, position: dict,) -> None:
+    def check_hack_vehicle_proximity(self, vehicle_id: str, position: dict,) -> None:
         """
-        Checks the proximity of a given vehicle to every other vehicle and updates
-        its `vehicle_in_proximity` attribute if any vehicle is within a specified distance.
+        Checks the proximity of a given vehicle to every other hackable vehicle and updates
+        its `vehicle_in_proximity` attribute if any hackable vehicle is within a specified distance.
 
         Parameters
         ----------
@@ -133,15 +178,17 @@ class CarMap:
         if proximity_vehicle_id is not None:
             pos_proximity_vehicle = self._environment_manager.get_vehicle_by_vehicle_id(proximity_vehicle_id).\
                 _location_service._current_position
-            if pos_proximity_vehicle.distance_to(pos_self) > 200:
+            if pos_proximity_vehicle.distance_to(pos_self) > self.__proximity_range:
                 self._environment_manager.get_vehicle_by_vehicle_id(vehicle_id).vehicle_in_proximity = None
         else:
-            for target_v_id in self._environment_manager._active_physical_cars:
-                vehicle = self._environment_manager.get_vehicle_by_vehicle_id(target_v_id)
-                pos_other = vehicle._location_service._current_position
-                if pos_other.distance_to(pos_self) < 200:
-                    self._environment_manager.get_vehicle_by_vehicle_id(vehicle_id).vehicle_in_proximity = target_v_id
-                    return
+            for target_v_id in (self._environment_manager._active_physical_cars if self.__can_physical_cars_be_hacked else []) + \
+                   (self._environment_manager._active_virtual_cars if self.__can_virtual_cars_be_hacked else []):
+                if target_v_id is not vehicle_id:
+                    vehicle = self._environment_manager.get_vehicle_by_vehicle_id(target_v_id)
+                    pos_other = vehicle._location_service._current_position
+                    if pos_other.distance_to(pos_self) < self.__proximity_range:
+                        self._environment_manager.get_vehicle_by_vehicle_id(vehicle_id).vehicle_in_proximity = target_v_id
+                        return
         return
 
     async def __emit_car_position(self, data: dict) -> None:
