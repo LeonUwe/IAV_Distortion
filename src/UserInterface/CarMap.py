@@ -36,11 +36,6 @@ class CarMap:
         self._sio: AsyncServer = sio
 
         try:
-            self._game_length = int(
-                self._config_handler.get_configuration()
-                ['minigame']['tapping-contest']['game-length'])
-
-        try:
             self.__proximity_range: int = int(
                 self.config_handler.get_configuration()
                 ["vehicle_takeover"]["proximity_timer"]["range"])
