@@ -188,9 +188,9 @@ class CarMap:
             if pos_proximity_vehicle.distance_to(pos_self) > self.__proximity_range:
                 self._environment_manager.get_vehicle_by_vehicle_id(vehicle_id).vehicle_in_proximity = None
         else:
-            for target_v_id in (self._environment_manager._active_physical_cars if self.\
-                __can_physical_cars_be_hacked else []) + \
-                    (self._environment_manager._active_virtual_cars if self.__can_virtual_cars_be_hacked else []):
+            for target_v_id in (self._environment_manager._active_physical_cars if self.__can_physical_cars_be_hacked
+                                else []) + (self._environment_manager._active_virtual_cars if
+                                            self.__can_virtual_cars_be_hacked else []):
                 if target_v_id is not vehicle_id:
                     vehicle = self._environment_manager.get_vehicle_by_vehicle_id(target_v_id)
                     pos_other = vehicle._location_service._current_position
