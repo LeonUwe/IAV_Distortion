@@ -151,14 +151,12 @@ class CarMap:
         position : dict
             Dictionary containing the 'x' and 'y' coordinates of the vehicle's position in the simulation.
         """
-        if self.__can_virtual_cars_hack is True:
-            for v in self._environment_manager._active_virtual_cars:
-                if v == vehicle_id:
-                    self.check_hack_vehicle_proximity(vehicle_id, position)
-        if self.__can_physical_cars_hack is True:
-            for v in self._environment_manager._active_physical_cars:
-                if v == vehicle_id:
-                    self.check_hack_vehicle_proximity(vehicle_id, position)
+        if self.__can_virtual_cars_hack:
+            if self._environment_manager.is_vehicle_in_virtual_vehicles(vehicle_id):
+                self.check_hack_vehicle_proximity(vehicle_id, position)
+        if self.__can_physical_cars_hack:
+            if self._environment_manager.is_vehicle_in_physical_vehicles(vehicle_id):
+                self.check_hack_vehicle_proximity(vehicle_id, position)
         return
 
     def check_hack_vehicle_proximity(self, vehicle_id: str, position: dict,) -> None:
