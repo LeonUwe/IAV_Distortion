@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+import unittest
 
 import pytest
 
@@ -8,7 +9,7 @@ from LocationService.Trigo import Position
 from UserInterface.CarMap import CarMap
 
 
-class TestVehicleProximity:
+class TestVehicleProximity(unittest.TestCase):
 
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
@@ -58,5 +59,5 @@ class TestVehicleProximity:
         self.car_map.check_virtual_vehicle_proximity("car1", {"x": 100, "y": 100})
 
         # Assert
-        assert not self.vehicle1.vehicle_in_proximity == "car2"
-        assert not self.vehicle2.vehicle_in_proximity == "car1"
+        self.assertIsNone(self.vehicle1.vehicle_in_proximity)
+        self.assertIsNone(self.vehicle2.vehicle_in_proximity)
