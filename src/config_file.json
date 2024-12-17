@@ -118,6 +118,20 @@
 			"game-ends": 10
 		}
 	},
+	"vehicle_takeover": {
+		"proximity_timer": {
+			"duration": 10,
+			"range": 500
+		},
+		"cars_that_can_hack": {
+			"virtuaL": true,
+			"physical": false
+		},
+		"hackable_cars": {
+			"virtuaL": false,
+			"physical": true
+		}
+	},
 	"display_settings": {
 		"disp_cm_slogan_enabled": true,
 		"disp_cm_slogan_text": "Can it be Safe without Security? - Find out while racing with us!",

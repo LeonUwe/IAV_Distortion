@@ -646,6 +646,20 @@ class StaffUI:
                 "item": {
                     'item_spawn_interval': int(new_settings.get('item_spawn_interval')),
                     'item_max_count': int(new_settings.get('item_max_count'))
+                },
+                'vehicle_takeover': {
+                    'proximity_timer': {
+                        'duration': int(new_settings.get('proximity_timer_duration_s')),
+                        'range': int(new_settings.get('proximity_timer_range')),
+                    },
+                    'cars_that_can_hack': {
+                        'virtuaL': new_settings.get('cars_that_can_hack_virtual') == 'on' ,
+                        'physical': new_settings.get('cars_that_can_hack_physical') == 'on',
+                    },
+                    'hackable_cars': {
+                        'virtuaL': new_settings.get('hackable_cars_virtual') == 'on',
+                        'physical': new_settings.get('hackable_cars_physical') == 'on',
+                    }
                 }
             }
 
