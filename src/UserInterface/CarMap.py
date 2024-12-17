@@ -1,5 +1,6 @@
 from quart import Blueprint, render_template
 from typing import Any, Coroutine, List, Dict
+import logging
 
 import asyncio
 
@@ -35,31 +36,31 @@ class CarMap:
 
         try:
             self.__proximity_range: int = int(self.config_handler.get_configuration()["vehicle_takeover"]
-                                                     ["proximity_timer"]["range"])
+                                                    ["proximity_timer"]["range"])
         except KeyError:
             logger.warning("No valid value for driver: proximity_timer/range in config_file. Using default "
                            "value of 200")
             self.__proximity_range = 200
 
         try:
-            self.__can_virtual_cars_hack: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
-                                                     ["cars_that_can_hack"]["virtuaL"])
+            self.__can_virtual_cars_hack: bool = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                    ["cars_that_can_hack"]["virtuaL"])
         except KeyError:
             logger.warning("No valid value for driver: cars_that_can_hack/virtuaL in config_file. Using default "
                            "value of true")
             self.__can_virtual_cars_hack = True
 
         try:
-            self.__can_physical_cars_hack: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
-                                                     ["cars_that_can_hack"]["physical"])
+            self.__can_physical_cars_hack: bool = bool(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                    ["cars_that_can_hack"]["physical"])
         except KeyError:
             logger.warning("No valid value for driver: cars_that_can_hack/physical in config_file. Using default "
                            "value of false")
             self.__can_physical_cars_hack = False
 
         try:
-            self.__can_virtual_cars_be_hacked: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
-                                                     ["hackable_cars"]["virtuaL"])
+            self.__can_virtual_cars_be_hacked: bool = bool(self.config_handler.get_configuration()
+                                                    ["vehicle_takeover"]["hackable_cars"]["virtuaL"])
 
         except KeyError:
             logger.warning("No valid value for driver: hackable_cars/virtuaL in config_file. Using default "
@@ -67,8 +68,8 @@ class CarMap:
             self.__can_virtual_cars_be_hacked = False
 
         try:
-            self.__can_physical_cars_be_hacked: boolean = bool(self.config_handler.get_configuration()["vehicle_takeover"]
-                                                     ["hackable_cars"]["physical"])
+            self.__can_physical_cars_be_hacked: bool = bool(self.config_handler.get_configuration()
+                                                    ["vehicle_takeover"]["hackable_cars"]["physical"])
         except KeyError:
             logger.warning("No valid value for driver: hackable_cars/physical in config_file. Using default "
                            "value of True")
@@ -179,7 +180,8 @@ class CarMap:
             if pos_proximity_vehicle.distance_to(pos_self) > self.__proximity_range:
                 self._environment_manager.get_vehicle_by_vehicle_id(vehicle_id).vehicle_in_proximity = None
         else:
-            for target_v_id in (self._environment_manager._active_physical_cars if self.__can_physical_cars_be_hacked else []) + \
+            for target_v_id in 
+                   (self._environment_manager._active_physical_cars if self.__can_physical_cars_be_hacked else []) + \
                    (self._environment_manager._active_virtual_cars if self.__can_virtual_cars_be_hacked else []):
                 if target_v_id is not vehicle_id:
                     vehicle = self._environment_manager.get_vehicle_by_vehicle_id(target_v_id)
