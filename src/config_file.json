@@ -25,7 +25,6 @@
 		"Virtual Vehicle 9": "D1FFAF51CB30_blue_top.webp"
 	},
 	"driver": {
-		"driver_proximity_timer_s": 5,
 		"driver_heartbeat_interval_ms": 5000,
 		"driver_heartbeat_timeout_s": 30,
 		"driver_reconnect_grace_period_s": 5,
@@ -117,6 +116,20 @@
 			"min-length": 2,
 			"max-length": 5,
 			"game-ends": 10
+		}
+	},
+	"vehicle_takeover": {
+		"proximity_timer": {
+			"duration": 3,
+			"range": 200
+		},
+		"cars_that_can_hack": {
+			"virtual": true,
+			"physical": true
+		},
+		"hackable_cars": {
+			"virtual": true,
+			"physical": true
 		}
 	},
 	"display_settings": {
