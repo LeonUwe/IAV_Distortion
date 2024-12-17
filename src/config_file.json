@@ -123,11 +123,11 @@
 			"range": 200
 		},
 		"cars_that_can_hack": {
-			"virtuaL": true,
+			"virtual": true,
 			"physical": true
 		},
 		"hackable_cars": {
-			"virtuaL": true,
+			"virtual": true,
 			"physical": true
 		}
 	},

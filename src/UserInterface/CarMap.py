@@ -49,9 +49,9 @@ class CarMap:
         try:
             self.__can_virtual_cars_hack: bool = bool(
                 self.config_handler.get_configuration()
-                ["vehicle_takeover"]["cars_that_can_hack"]["virtuaL"])
+                ["vehicle_takeover"]["cars_that_can_hack"]["virtual"])
         except KeyError:
-            logger.warning("No valid value for driver: cars_that_can_hack/virtuaL in config_file. Using default "
+            logger.warning("No valid value for driver: cars_that_can_hack/virtual in config_file. Using default "
                            "value of true")
             self.__can_virtual_cars_hack = True
 
@@ -67,10 +67,10 @@ class CarMap:
         try:
             self.__can_virtual_cars_be_hacked: bool = bool(
                 self.config_handler.get_configuration()
-                ["vehicle_takeover"]["hackable_cars"]["virtuaL"])
+                ["vehicle_takeover"]["hackable_cars"]["virtual"])
 
         except KeyError:
-            logger.warning("No valid value for driver: hackable_cars/virtuaL in config_file. Using default "
+            logger.warning("No valid value for driver: hackable_cars/virtual in config_file. Using default "
                            "value of False")
             self.__can_virtual_cars_be_hacked = False
 
