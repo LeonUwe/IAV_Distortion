@@ -345,7 +345,7 @@ class EnvironmentManager:
             self.update_staff_ui()
             d = self.get_driver_by_id(player_id)
             d.set_offline()
-            self.__run_async_task(self.__remove_offline_driver(d))
+            self.__run_async_task(self.remove_offline_driver(d, False))
             return True
         else:
             return False
@@ -492,7 +492,7 @@ class EnvironmentManager:
         asyncio.create_task(task)
         # TODO: Log error, if the coroutine doesn't end successfully
 
-    async def __remove_offline_driver(self, d: Driver) -> None:
+    async def remove_offline_driver(self, d: Driver, now: bool) -> None:
         """
         Wait for offline removal period then remove player if still offline.
 
@@ -501,14 +501,17 @@ class EnvironmentManager:
         d: Driver
             Driver instance of player to be removed
         """
-        period = int(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
-        offline_since = d.get_offline_since()
-        try:
-            await asyncio.sleep(period*60)
-            if d.get_offline_since() == offline_since:
-                self.__remove_driver(d)
-        except asyncio.CancelledError:
-            logger.debug(f"Player {d.get_player_id()} reconnected. Removing player aborted.")
+        if now:
+            period = int(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
+            offline_since = d.get_offline_since()
+            try:
+                await asyncio.sleep(period*60)
+                if d.get_offline_since() == offline_since:
+                    self.__remove_driver(d)
+            except asyncio.CancelledError:
+                logger.debug(f"Player {d.get_player_id()} reconnected. Removing player aborted.")
+        else:
+            self.__remove_driver(d)
 
     async def __remove_player_after_grace_period(self, player: str, grace_period: int = 5) -> None:
         """

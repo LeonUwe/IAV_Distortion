@@ -264,6 +264,8 @@ class StaffUI:
             """
             # TODO: authentication check for websocket events
             environment_mng.manage_removal_from_game_for(player, )
+            driver = environment_mng.get_driver_by_id(player)
+            environment_mng.remove_offline_driver(driver, True)
             logger.debug("Player deleted %s", player)
             return
 
