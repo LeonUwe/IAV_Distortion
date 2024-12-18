@@ -214,7 +214,7 @@ class DriverUI:
             return
 
         @self._sio.on('is_nickname_available')
-        async def is_nickname_available(sid, data:dict) -> None:
+        async def is_nickname_available(sid, data: dict) -> None:
             drivers = self.environment_mng.get_drivers()
             nickname = data.get("nickname")
             id = data.get("player")
@@ -223,7 +223,6 @@ class DriverUI:
                 if d.get_nickname() == nickname:
                     available = False
             self.__run_async_task(self.__emit_nickname_available(id, available))
-            
 
         @self._sio.on('set_nickname')
         async def set_nickname(sid, data: dict) -> None:

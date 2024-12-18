@@ -41,12 +41,12 @@ class Driver:
 
     def set_nickname(self, nickname) -> None:
         self.__nickname = nickname
-    
+
     def get_offline_since(self) -> time:
         return self.__offline_since
-    
+
     def set_offline(self) -> None:
         self.__offline_since = time.time()
-    
+
     def set_online(self) -> None:
         self.__offline_since = None
