@@ -12,6 +12,7 @@ import re
 
 from enum import Enum
 from datetime import datetime, timedelta
+import time
 from typing import List, Dict, Callable
 from collections import deque
 from deprecated import deprecated
@@ -271,6 +272,7 @@ class EnvironmentManager:
         for p in self._player_list:
             if p.get_player_id() == player_id:
                 isNewPlayer = False
+                p.set_online()
         if isNewPlayer is True:
             newDriver = Driver(player_id=player_id)
             self._player_list.append(newDriver)
@@ -363,6 +365,9 @@ class EnvironmentManager:
             self._publish_removed_player(player_id=player_id, reason=reason)
             self.update_staff_ui()
             self.manage_bot_safe_mode()
+            d = self.get_driver_by_id(player_id)
+            d.set_offline()
+            self.__run_async_task(self.__remove_offline_driver_after(d))
             return True
         else:
             return False
@@ -584,7 +589,26 @@ class EnvironmentManager:
             self._remove_player_tasks[player].cancel()
             del self._remove_player_tasks[player]
         return
+    
+    def __run_async_task(self, task):
+        """
+        Run a asyncio awaitable task
+        task: awaitable task
+        """
+        asyncio.create_task(task)
+        # TODO: Log error, if the coroutine doesn't end successfully
 
+
+    async def __remove_offline_driver_after(self, d: Driver, period: int = 10) -> None:
+        offline_since = d.get_offline_since()
+        try:
+            await asyncio.sleep(period)
+            if d.get_offline_since() == offline_since:
+                self.__remove_driver(d)
+        except asyncio.CancelledError:
+            logger.debug(f"Player {d.get_player_id()} reconnected. Removing player aborted.")
+    
+    
     async def __remove_player_after_grace_period(self, player: str, grace_period: int = 5) -> None:
         """
         Wait for grace period then removes player.
@@ -929,3 +953,7 @@ class EnvironmentManager:
         Returns all Drivers of this session
         """
         return self._player_list
+    
+    def __remove_driver(self, driver: Driver) -> None:
+        self._player_list.remove(driver)
+        logger.info("Removing driver with player ID " + driver.get_player_id() + " from the driver list")
