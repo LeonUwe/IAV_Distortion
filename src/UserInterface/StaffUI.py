@@ -577,6 +577,7 @@ class StaffUI:
                 'driver': {
                     'driver_heartbeat_interval_ms': int(new_settings.get('driver_heartbeat_interval_ms')),
                     'driver_heartbeat_timeout_s': int(new_settings.get('driver_heartbeat_timeout_s')),
+                    'driver_removal_period_min': int(new_settings.get('driver_removal_period_min')),
                     'driver_reconnect_grace_period_s': int(new_settings.get('driver_reconnect_grace_period_s')),
                     'driver_background_grace_period_s': int(new_settings.get('driver_background_grace_period_s'))},
                 'game_config': {
