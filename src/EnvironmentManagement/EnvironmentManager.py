@@ -367,7 +367,8 @@ class EnvironmentManager:
             self.manage_bot_safe_mode()
             d = self.get_driver_by_id(player_id)
             d.set_offline()
-            self.__run_async_task(self.__remove_offline_driver_after(d))
+            self.__run_async_task(self.__remove_offline_driver_after(d, period=self.config_handler.get_configuration()["driver"]["driver_removal_period_min"]))
+            logger.info(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
             return True
         else:
             return False
@@ -602,7 +603,7 @@ class EnvironmentManager:
     async def __remove_offline_driver_after(self, d: Driver, period: int = 10) -> None:
         offline_since = d.get_offline_since()
         try:
-            await asyncio.sleep(period)
+            await asyncio.sleep(period*60)
             if d.get_offline_since() == offline_since:
                 self.__remove_driver(d)
         except asyncio.CancelledError:

@@ -25,9 +25,10 @@
 		"Virtual Vehicle 9": "D1FFAF51CB30_blue_top.webp"
 	},
 	"driver": {
-    "driver_proximity_timer_s": 5,
+		"driver_proximity_timer_s": 5,
 		"driver_heartbeat_interval_ms": 5000,
 		"driver_heartbeat_timeout_s": 30,
+		"driver_removal_period_min": 1,
 		"driver_reconnect_grace_period_s": 5,
 		"driver_background_grace_period_s": 30
 	},
@@ -43,7 +44,7 @@
 	},
 	"item": {
 		"item_spawn_interval": 30,
-		"item_max_count" : 2
+		"item_max_count": 2
 	},
 	"track": [
 		{
@@ -108,8 +109,8 @@
 			"Minigame_Test": false,
 			"Tapping_Contest": true
 		},
-		"tapping-contest" : {
-			"game-length" : 10
+		"tapping-contest": {
+			"game-length": 10
 		}
 	},
 	"display_settings": {
