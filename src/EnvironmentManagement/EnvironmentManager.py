@@ -346,7 +346,8 @@ class EnvironmentManager:
             d = self.get_driver_by_id(player_id)
             d.set_offline()
             self.__run_async_task(self.__remove_offline_driver_after(d, period=self.config_handler
-                                        .get_configuration()["driver"]["driver_removal_period_min"]))
+                                                                     .get_configuration()\
+                                                                        ["driver"]["driver_removal_period_min"]))
             logger.info(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
             return True
         else:
