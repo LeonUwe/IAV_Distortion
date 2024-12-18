@@ -495,6 +495,16 @@ class EnvironmentManager:
 
 
     async def __remove_offline_driver_after(self, d: Driver, period: int = 10) -> None:
+        """
+        Wait for ofline removal period then remove player if still offline.
+
+        Parameters
+        ----------
+        d: Driver
+            Driver instance of player to be removed
+        period: int
+            Time to wait in minutes until player is removed, if still offline.
+        """
         offline_since = d.get_offline_since()
         try:
             await asyncio.sleep(period*60)
@@ -802,5 +812,13 @@ class EnvironmentManager:
         return self._player_list
     
     def __remove_driver(self, driver: Driver) -> None:
+        """
+        Removes the Driver instance of a specific player from the Driver list.
+
+        Parameters
+        ----------
+        driver: Driver
+            Driver instance to be removed.
+        """
         self._player_list.remove(driver)
         logger.info("Removing driver with player ID " + driver.get_player_id() + " from the driver list")
