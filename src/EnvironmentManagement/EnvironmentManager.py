@@ -345,8 +345,7 @@ class EnvironmentManager:
             self.update_staff_ui()
             d = self.get_driver_by_id(player_id)
             d.set_offline()
-            p = int(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
-            self.__run_async_task(self.__remove_offline_driver_after(d, period=p))
+            self.__run_async_task(self.__remove_offline_driver(d))
             return True
         else:
             return False
@@ -493,17 +492,16 @@ class EnvironmentManager:
         asyncio.create_task(task)
         # TODO: Log error, if the coroutine doesn't end successfully
 
-    async def __remove_offline_driver_after(self, d: Driver, period: int = 10) -> None:
+    async def __remove_offline_driver(self, d: Driver) -> None:
         """
-        Wait for ofline removal period then remove player if still offline.
+        Wait for offline removal period then remove player if still offline.
 
         Parameters
         ----------
         d: Driver
             Driver instance of player to be removed
-        period: int
-            Time to wait in minutes until player is removed, if still offline.
         """
+        period = int(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
         offline_since = d.get_offline_since()
         try:
             await asyncio.sleep(period*60)
