@@ -319,7 +319,7 @@ class DriverUI:
 
     async def __in_physical_vehicle(self, driver: Driver) -> None:
         """
-        Constantly increases a drivers score while he is in a physical vehicle.
+        Constantly increases a drivers score while they are in a physical vehicle.
 
         Parameters
         ----------
