@@ -48,12 +48,12 @@ class DriverUI:
             self.__driver_heartbeat_timeout = 30
 
         try:
-            self.__driver_proximity_timer: int = int(self.config_handler.get_configuration()["driver"]
-                                                     ["driver_proximity_timer_s"])
+            self.__driver_proximity_timer: int = int(self.config_handler.get_configuration()["vehicle_takeover"]
+                                                     ["proximity_timer"]["duration"])
         except KeyError:
-            logger.warning("No valid value for driver: driver_proximity_timer in config_file. Using default "
-                           "value of 5 seconds")
-            self.__driver_proximity_timer = 5
+            logger.warning("No valid value for driver: proximity_timer/duration in config_file. Using default "
+                           "value of 3 seconds")
+            self.__driver_proximity_timer = 3
 
         async def home_driver() -> str:
             """
@@ -229,19 +229,23 @@ class DriverUI:
             if self.__has_hacking_protection(vehicle=target_vehicle):
                 return
             target_player = target_vehicle.get_player_id()
+            minigame_players = []
+            minigame_players.append(player)
+            if target_player is not None:
+                minigame_players.append(target_player)
 
             # Try to start Minigame
             minigame_task, minigame_object = Minigame_Controller.get_instance().\
-                play_random_available_minigame(player, target_player)
+                play_random_available_minigame(*minigame_players)
 
             if minigame_task is None:
                 logger.warning(f"DriverUI: The minigame for player {player} and player {target_player} could not be \
                     started for some reason. Ignoring the request.")
                 return
             winner = await minigame_task
-            logger.debug(f"DriverUI: The player {player} has won a minigame that was \
+            logger.info(f"DriverUI: The player {player} has won a minigame that was \
                 initiated by a hack of vehicle {target_vehicle_id}.")
-            if winner is None or winner == target_player or winner == "":
+            if winner != player:
                 return
 
             self.environment_mng.manage_car_switch_for(player, target_vehicle_id)

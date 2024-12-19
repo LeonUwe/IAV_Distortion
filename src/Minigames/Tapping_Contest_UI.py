@@ -8,7 +8,7 @@ import random
 
 
 class Tapping_Contest_UI(Minigame):
-    def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
+    def __init__(self, sio: AsyncServer, namespace: str, blueprint: Blueprint | None = None, name=__name__):
         super().__init__(sio, blueprint, name)
         self._players: list[str] = []
         self._config_handler = ConfigurationHandler()
@@ -21,14 +21,15 @@ class Tapping_Contest_UI(Minigame):
             print("Tapping_Contest_UI: No (proper) Configuration found for \
                 ['minigame']['tapping-contest']['game-length]. Using default value of 10 seconds.")
 
-        @self._sio.on('join_game')
+        @self._sio.on('Tapping_Contest_join')
         async def on_join_game(sid: str, data):
             player_id = data['player_id']
             if player_id in self._players:
-                await self._sio.enter_room(sid, "Tapping_Contest")
-                await self._sio.emit('joined', {'player_id': player_id}, room=player_id)
+                await self._sio.enter_room(sid, self._room)
+                await self._sio.emit('Tapping_Contest_joined', {'player_id': player_id,
+                                                                'namespace': namespace}, room=self._room)
 
-        @self._sio.on('click')
+        @self._sio.on('Tapping_Contest_click', namespace='/' + namespace)
         async def handle_click(sid: str, data):
             player_id = data['player_id']
             await self._record_click(player_id)
@@ -52,8 +53,10 @@ class Tapping_Contest_UI(Minigame):
 
         self._players.clear()
         self._players.append(players[0])
+        self._room = players[0]
         if len(players) > 1:
             self._players.append(players[1])
+            self._room += players[1]
         return self.get_players()
 
     async def _play(self) -> str:
@@ -67,7 +70,7 @@ class Tapping_Contest_UI(Minigame):
         await asyncio.sleep(self._game_length)  # Game duration
 
         winner_index = self._game.get_winner()
-        while self._game.get_winner() == -1:
+        while winner_index == -1:
             winner_index = self._game.get_winner()
             await asyncio.sleep(1)
 
@@ -84,7 +87,7 @@ class Tapping_Contest_UI(Minigame):
 
     async def _start_game(self):
         self._game.start()
-        await self._sio.emit('start_game', {'game-length': self._game_length}, room="Tapping_Contest")
+        await self._sio.emit('start_game', {'game-length': self._game_length}, room=self._room)
 
     async def _record_click(self, player_id: str):
         if player_id not in self._players:
@@ -97,11 +100,11 @@ class Tapping_Contest_UI(Minigame):
         await self._sio.emit(
             'update_clicks',
             {'player_id': player_id, 'clicks': self._game.get_clicks()[player_index], 'cps': cps},
-            room="Tapping_Contest"
+            room=self._room
         )
 
     async def _send_tie(self):
-        await self._sio.emit('tie', to="Tapping_Contest")
+        await self._sio.emit('tie', to=self._room)
 
     def description(self) -> str:
         return f"Whoever clicks more times in {self._game_length} seconds, wins."

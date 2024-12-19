@@ -24,17 +24,18 @@ from Minigames.Minigame import Minigame
 logger = logging.getLogger(__name__)
 
 
-class Minigame_UI:
+class MinigameLobbyUI:
 
     def __init__(self, sio: AsyncServer, environment_mng: EnvironmentManager, behaviour_ctrl: BehaviourController,
                  name=__name__) -> None:
-        self.minigame_ui_blueprint: Blueprint = Blueprint(name='minigameUI_bp', import_name='minigameUI_bp')
+        self.minigame_lobby_ui_blueprint: Blueprint = Blueprint(name='minigame_lobby_ui_blueprint_bp',
+                                                                import_name='minigame_lobby_ui_blueprint_bp')
         self._sio: AsyncServer = sio
         self._environment_mng: EnvironmentManager = environment_mng
         self._behaviour_ctrl = behaviour_ctrl
         self.config_handler: ConfigurationHandler = ConfigurationHandler()
         self._minigame_controller: Minigame_Controller =\
-            Minigame_Controller.get_instance(sio=self._sio, minigame_ui_blueprint=self.minigame_ui_blueprint)
+            Minigame_Controller.get_instance(sio=self._sio, minigame_ui_blueprint=self.minigame_lobby_ui_blueprint)
         self._minigame_controller.set_minigame_start_callback(self._minigame_started_callback)
         try:
             self._driving_speed_while_playing =\
@@ -45,24 +46,24 @@ class Minigame_UI:
             self._driving_speed_while_playing = 30
 
         try:
-            self.__driver_heartbeat_timeout: int = int(self.config_handler.get_configuration()["driver"]
-                                                       ["driver_heartbeat_timeout_s"])
+            self.__driver_heartbeat_interval: int = int(self.config_handler.get_configuration()["driver"]
+                                                        ["driver_heartbeat_interval_ms"])
         except KeyError:
             logger.warning("No valid value for driver: driver_heartbeat_timeout in config_file. Using default "
                            "value of 30 seconds")
-            self.__driver_heartbeat_timeout = 30
+            self.__driver_heartbeat_interval = 30
 
         async def home_minigame() -> str:
             player = request.cookies.get("player")
-            if player is None or self._minigame_controller.get_minigame_name_by_player_id(player) is None:
+            if player is None or self._minigame_controller.get_minigame_instance_by_player_id(player) is None:
                 return redirect(url_for("driverUI_bp.home_driver"))
 
-            return await render_template(template_name_or_list='minigame_index.html',
+            return await render_template(template_name_or_list='minigame_lobby.html',
                                          player=player,
                                          minigame=self._minigame_controller.get_minigame_name_by_player_id(player),
-                                         heartbeat_interval=self.__driver_heartbeat_timeout)
+                                         heartbeat_interval=self.__driver_heartbeat_interval)
 
-        self.minigame_ui_blueprint.add_url_rule('/', 'minigame', view_func=home_minigame)
+        self.minigame_lobby_ui_blueprint.add_url_rule('/', 'minigame', view_func=home_minigame)
 
         async def exit_minigame() -> str:
             player_id = request.args.get(key='player_id', type=str)
@@ -70,7 +71,7 @@ class Minigame_UI:
 
             return await render_template(template_name_or_list='driver_index.html', player=player_id, message=reason)
 
-        self.minigame_ui_blueprint.add_url_rule('/exit', 'exit_driver', view_func=exit_minigame)
+        self.minigame_lobby_ui_blueprint.add_url_rule('/exit', 'exit_driver', view_func=exit_minigame)
 
         @self._sio.on('minigame_handle_connect')
         def handle_connected(sid: str, data: dict) -> None:
@@ -98,21 +99,16 @@ class Minigame_UI:
         def handle_disconnected(sid, data):
             player = data["player"]
             logger.debug(f"Driver {player} disconnected from the minigame lobby!")
-            minigame_name = self._minigame_controller.get_minigame_name_by_player_id(player)
-            if minigame_name is None or minigame_name not in self._minigame_controller.get_minigame_name_list():
-                return
-
-            self._minigame_controller.get_minigame_object(minigame_name).cancel()
+            self._minigame_controller.handle_player_removed(player)
             return
 
         @self._sio.on('minigame_player_accept')
         def on_minigame_player_accept(sid, data):
             player = data['player']
-            minigame_name = data['minigame']
-            self._minigame_controller.set_player_ready(player, minigame_name)
+            self._minigame_controller.set_player_ready(player)
 
     def get_blueprint(self) -> Blueprint:
-        return self.minigame_ui_blueprint
+        return self.minigame_lobby_ui_blueprint
 
     async def _send_description(self, minigame: str) -> None:
         """
@@ -172,13 +168,14 @@ class Minigame_UI:
                 winner = None
             else:
                 winner = await minigame_task
+            data = {}
+            for i, player in enumerate(actually_playing):
+                data["player" + str(i)] = player
+            data['minigame'] = minigame_object.get_name()
+            data['winner'] = winner
+            data['owner_of_physical_vehicle_at_start'] = owner_of_physical_vehicle_at_start
 
-            winner = await minigame_task
-
-            await self._sio.emit('minigame_winner',
-                                 {'minigame': minigame_object.get_name(),
-                                  'winner': winner,
-                                  'owner_of_physical_vehicle_at_start': owner_of_physical_vehicle_at_start})
+            await self._sio.emit('minigame_winner', data)
 
             await asyncio.sleep(5)
             await self.redirect_to_driver_ui(*actually_playing)

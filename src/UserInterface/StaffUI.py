@@ -649,6 +649,20 @@ class StaffUI:
                 "item": {
                     'item_spawn_interval': int(new_settings.get('item_spawn_interval')),
                     'item_max_count': int(new_settings.get('item_max_count'))
+                },
+                'vehicle_takeover': {
+                    'proximity_timer': {
+                        'duration': int(new_settings.get('proximity_timer_duration_s')),
+                        'range': int(new_settings.get('proximity_timer_range')),
+                    },
+                    'cars_that_can_hack': {
+                        'virtual': new_settings.get('cars_that_can_hack_virtual') == 'on',
+                        'physical': new_settings.get('cars_that_can_hack_physical') == 'on',
+                    },
+                    'hackable_cars': {
+                        'virtuali': new_settings.get('hackable_cars_virtual') == 'on',
+                        'physical': new_settings.get('hackable_cars_physical') == 'on',
+                    }
                 }
             }
 
@@ -675,12 +689,19 @@ class StaffUI:
                 'minigame': {
                     'auto_drive_constantly': new_settings.get('auto_drive_constantly') == 'on',
                     'driving_speed_while_playing': int(new_settings.get('driving_speed_while_playing')),
+                    'rule_acceptance_timeout': int(new_settings.get('rule_acceptance_timeout')),
                     'games': {
                         'Minigame_Test': new_settings.get('Minigame_Test') == 'on',
-                        'Tapping_Contest': new_settings.get('Tapping_Contest') == 'on'
+                        'Tapping_Contest': new_settings.get('Tapping_Contest') == 'on',
+                        'Reaction_Contest': new_settings.get('Reaction_Contest') == 'on'
                     },
                     'tapping-contest': {
                         'game-length': int(new_settings.get('Tapping_Contest_Game_length'))
+                    },
+                    'reaction-contest': {
+                        'min-length': int(new_settings.get('Reaction_Contest_Min_length')),
+                        'max-length': int(new_settings.get('Reaction_Contest_Max_length')),
+                        'game-ends': int(new_settings.get('Reaction_Contest_Game_length'))
                     },
                 }
             }

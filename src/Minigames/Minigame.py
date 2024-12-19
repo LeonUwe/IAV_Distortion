@@ -1,15 +1,19 @@
 from quart import Blueprint, render_template, request
 import uuid
 import asyncio
+import logging
 
 from socketio import AsyncServer
 from abc import abstractmethod
 
+from EnvironmentManagement.ConfigurationHandler import ConfigurationHandler
+
+logger = logging.getLogger(__name__)
+
 
 class Minigame:
 
-    def __init__(self, sio: AsyncServer, blueprint: Blueprint, name=__name__):
-        self.minigame_ui_blueprint: Blueprint = blueprint
+    def __init__(self, sio: AsyncServer, blueprint: Blueprint | None = None, name=__name__):
         self._sio: AsyncServer = sio
         self._name = name
         if "." in name:
@@ -19,6 +23,20 @@ class Minigame:
         self._players: list[str] = []
         self._ready_players: list[str] = []
         self._task = None
+        self._started = False
+        self._config_handler = ConfigurationHandler()
+        try:
+            self._rule_acceptance_timeout = \
+                int(self._config_handler.get_configuration()['minigame']['rule_acceptance_timeout'])
+        except Exception:
+            logger.warning("No valid value for minigame: rule_acceptance_timeout in config_file. \
+            Using default value of 20")
+            self._rule_acceptance_timeout = 20
+
+        if blueprint is None:
+            return
+
+        self.minigame_lobby_ui_blueprint: Blueprint = blueprint
 
         async def home_minigame() -> str:
             """
@@ -36,9 +54,9 @@ class Minigame:
 
             return await render_template(template_name_or_list=self._name + '.html', player=player)
 
-        self.minigame_ui_blueprint.add_url_rule(f'/{self._name}', self._name, view_func=home_minigame)
+        self.minigame_lobby_ui_blueprint.add_url_rule(f'/{self._name}', self._name, view_func=home_minigame)
 
-    async def play(self, *players: str) -> str:
+    def play(self, *players: str) -> asyncio.Task:
         """
         Starts the task of playing the minigame
 
@@ -50,26 +68,38 @@ class Minigame:
         ----------
         ID of the victor
         """
-        actually_playing = self.set_players(*players)
+        self._started = False
+        asyncio.create_task(self._check_rule_acceptance_timeout())
 
-        # Check if all players have accepted the rules
-        all_ready = False
-        while not all_ready:
-            all_ready = True
-            for player in actually_playing:
-                if player not in self._ready_players:
-                    all_ready = False
-            if all_ready:
-                for i in range(3, -1, -1):
-                    await self._sio.emit('all_ready', {"minigame": self.get_name(), "countdown": i})
-                    if i > 0:
-                        await asyncio.sleep(1)
-                break
-            else:
-                await asyncio.sleep(1)
+        async def play_after_all_players_ready() -> str:
+            actually_playing = self.set_players(*players)
 
-        self._task = asyncio.create_task(self._play())
-        return await self._task
+            # Check if all players have accepted the rules
+            all_ready = False
+            while not all_ready:
+                all_ready = True
+                for player in actually_playing:
+                    if player not in self._ready_players:
+                        all_ready = False
+                if all_ready:
+                    self._started = True
+                    player_data = {}
+                    for i, player in enumerate(actually_playing):
+                        player_data['player' + str(i)] = player
+                    for i in range(3, -1, -1):
+                        data = player_data.copy()
+                        data['countdown'] = i
+                        data['minigame'] = self._name
+                        await self._sio.emit('all_ready', data)
+                        if i > 0:
+                            await asyncio.sleep(1)
+                    break
+                else:
+                    await asyncio.sleep(.1)
+            return await self._play()
+
+        self._task = asyncio.create_task(play_after_all_players_ready())
+        return self._task
 
     @abstractmethod
     async def _play(self) -> str:
@@ -144,3 +174,15 @@ class Minigame:
 
     def get_name(self) -> str:
         return self._name
+
+    async def _check_rule_acceptance_timeout(self) -> None:
+        """
+        Checks if the minigame has started after the rule acceptance timeout delay.
+        Cancels minigame if the rules have not been accepted.
+        """
+        await asyncio.sleep(self._rule_acceptance_timeout)
+        if self._started:
+            # Minigame has already started -> rules have been accepted by everyone
+            return
+
+        self.cancel()
