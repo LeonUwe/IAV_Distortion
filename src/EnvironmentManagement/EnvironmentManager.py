@@ -500,8 +500,10 @@ class EnvironmentManager:
         ----------
         d: Driver
             Driver instance of player to be removed
+        now: bool
+            Boolean value if player is to be removed now or after the set period
         """
-        if now:
+        if not now:
             period = int(self.config_handler.get_configuration()["driver"]["driver_removal_period_min"])
             offline_since = d.get_offline_since()
             try:
