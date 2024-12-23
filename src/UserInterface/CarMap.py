@@ -2,8 +2,6 @@ import logging
 from quart import Blueprint, render_template
 from typing import Any, Coroutine, List, Dict
 
-import logging
-
 import asyncio
 
 from socketio import AsyncServer
