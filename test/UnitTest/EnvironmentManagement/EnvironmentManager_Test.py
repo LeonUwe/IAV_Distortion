@@ -276,7 +276,8 @@ class TestManageRemovalFromGame:
     def test_for_valid_player_id_and_reason(self, get_mut_with_endless_playing_time,
                                             get_one_dummy_vehicle):
         # Arrange
-        with patch('EnvironmentManagement.EnvironmentManager.EnvironmentManager._EnvironmentManager__run_async_task', return_value=None):
+        with patch('EnvironmentManagement.EnvironmentManager.EnvironmentManager.\
+         _EnvironmentManager__run_async_task', return_value=None):
             vehicle1: Vehicle = get_one_dummy_vehicle
             mut: EnvironmentManager = get_mut_with_endless_playing_time
 
