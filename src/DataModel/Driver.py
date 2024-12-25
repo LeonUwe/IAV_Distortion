@@ -1,5 +1,3 @@
-from DataModel.Vehicle import Vehicle
-
 import time
 
 
@@ -20,10 +18,10 @@ class Driver:
         self.__nickname: str = ""
         self.__offline_since: time
         return
-    
+
     def get_score(self) -> int:
         return self.__score
-    
+
     def increase_score(self, amount: int) -> None:
         self.__score += amount
 
@@ -32,7 +30,7 @@ class Driver:
 
     def get_is_in_physical_vehicle(self) -> bool:
         return self.__in_physical_vehicle
-    
+
     def get_player_id(self) -> str:
         return self.__player
 

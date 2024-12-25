@@ -277,7 +277,9 @@ class DriverUI:
             return None
 
     async def __emit_driver_score(self, driver: Driver) -> None:
-        await self._sio.emit('update_player_score', {'score': driver.get_score().__round__(0), 'player': driver.get_player_id()})
+        await self._sio.emit('update_player_score',
+                             {'score': driver.get_score().__round__(0),
+                              'player': driver.get_player_id()})
 
     async def __in_physical_vehicle(self, driver: Driver) -> None:
         """
