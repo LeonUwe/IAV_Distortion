@@ -296,7 +296,8 @@ class TestManageRemovalFromGame:
     def test_for_valid_player_id_and_reason(self, get_mut_with_endless_playing_time,
                                             get_one_dummy_vehicle):
         # Arrange
-        with patch('Minigames.Minigame_Controller.Minigame_Controller.__init__', return_value=None):
+        with patch('Minigames.Minigame_Controller.Minigame_Controller.__init__', return_value=None), \
+         patch('EnvironmentManagement.EnvironmentManager.EnvironmentManager.__run_async_task', return_value=None):
             minigame_controller_mock = MagicMock()
             minigame_controller_mock._minigame_objects = {}
             Minigame_Controller.instance = minigame_controller_mock
