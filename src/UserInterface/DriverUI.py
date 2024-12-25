@@ -204,7 +204,8 @@ class DriverUI:
             vehicle = self.get_vehicle_by_player(player=player)
             driver = self.environment_mng.get_driver_by_id(player_id=player)
             self.__run_async_task(self.__emit_driver_score(driver=driver))
-            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
+            self.__run_async_task(self.__emit_driver_has_no_nickname(driver=driver))
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
 
@@ -250,13 +251,39 @@ class DriverUI:
             self.environment_mng.manage_car_switch_for(player, target_vehicle_id)
             driver = self.environment_mng.get_driver_by_id(player_id=player)
             self.__run_async_task(self.__emit_driver_score(driver=driver))
-            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True:
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
                 self.__run_async_task(self.__in_physical_vehicle(driver))
             return
+
+        @self._sio.on('is_nickname_available')
+        async def is_nickname_available(sid, data: dict) -> None:
+            drivers = self.environment_mng.get_drivers()
+            nickname = data.get("nickname")
+            id = data.get("player")
+            available = True
+            for d in drivers:
+                if d.get_nickname() == nickname:
+                    available = False
+            self.__run_async_task(self.__emit_nickname_available(id, available))
+
+        @self._sio.on('set_nickname')
+        async def set_nickname(sid, data: dict) -> None:
+            driver = self.environment_mng.get_driver_by_id(data.get("player"))
+            driver.set_nickname(data.get("nickname"))
+            vehicle = self.environment_mng.get_vehicle_by_player_id(data.get("player"))
+            if vehicle is not None and driver.get_is_in_physical_vehicle() is not True and driver.get_nickname() != "":
+                self.__run_async_task(self.__in_physical_vehicle(driver))
 
     def update_driving_data(self, driving_data: dict) -> None:
         self.__run_async_task(self.__emit_driving_data(driving_data))
         return
+
+    async def __emit_driver_has_no_nickname(self, driver: Driver) -> None:
+        if driver.get_nickname() == "":
+            await self._sio.emit('has_no_nickname', {'player': driver.get_player_id()})
+
+    async def __emit_nickname_available(self, id: str, available: bool) -> None:
+        await self._sio.emit('nickname_available', {'player': id, 'available': available})
 
     async def __emit_driving_data(self, driving_data: dict) -> None:
         await self._sio.emit('update_driving_data', driving_data)
@@ -295,6 +322,14 @@ class DriverUI:
         await self._sio.emit('update_player_score', {'score': driver.get_score(), 'player': driver.get_player_id()})
 
     async def __in_physical_vehicle(self, driver: Driver) -> None:
+        """
+        Constantly increases a drivers score while they are in a physical vehicle.
+
+        Parameters
+        ----------
+        driver: Driver
+                    Driver instance of a specific player
+        """
         driver.set_is_in_physical_vehicle(True)
         while self.get_vehicle_by_player(player=driver.get_player_id()) is not None and \
                 "Virtual" not in self.get_vehicle_by_player(player=driver.get_player_id()).get_vehicle_id():
