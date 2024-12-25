@@ -281,30 +281,30 @@ class TestManageRemovalFromGame:
             vehicle1: Vehicle = get_one_dummy_vehicle
             mut: EnvironmentManager = get_mut_with_endless_playing_time
 
-        mut._add_to_active_vehicle_list(vehicle1)
-        if any(vehicle.get_player_id() is not None for vehicle in mut.get_vehicle_list()):
-            pytest.fail("preconditions in vehicle list not correct.")
+            mut._add_to_active_vehicle_list(vehicle1)
+            if any(vehicle.get_player_id() is not None for vehicle in mut.get_vehicle_list()):
+                pytest.fail("preconditions in vehicle list not correct.")
 
-        mut.put_player_on_next_free_spot("dummyplayer1")
-        mut.put_player_on_next_free_spot("dummyplayer2")
-        if not sum(vehicle.get_player_id() == "dummyplayer1"
-                   for vehicle in mut.get_vehicle_list()) == 1:
-            pytest.fail("preconditions in vehicle list not correct.")
+            mut.put_player_on_next_free_spot("dummyplayer1")
+            mut.put_player_on_next_free_spot("dummyplayer2")
+            if not sum(vehicle.get_player_id() == "dummyplayer1"
+                    for vehicle in mut.get_vehicle_list()) == 1:
+                pytest.fail("preconditions in vehicle list not correct.")
 
-        if not any(player == "dummyplayer2"
-                   for player in mut.get_waiting_players()):
-            pytest.fail("preconditions in vehicle list not correct.")
+            if not any(player == "dummyplayer2"
+                    for player in mut.get_waiting_players()):
+                pytest.fail("preconditions in vehicle list not correct.")
 
-        # Act / Assert
-        assert len(mut.get_waiting_players()) == 1
-        result = mut.manage_removal_from_game_for("dummyplayer2", RemovalReason.NONE)
-        assert result
-        assert len(mut.get_waiting_players()) == 0
+            # Act / Assert
+            assert len(mut.get_waiting_players()) == 1
+            result = mut.manage_removal_from_game_for("dummyplayer2", RemovalReason.NONE)
+            assert result
+            assert len(mut.get_waiting_players()) == 0
 
-        result = mut.manage_removal_from_game_for("dummyplayer1", RemovalReason.NONE)
-        assert result
-        assert all(vehicle.get_player_id() is None
-                   for vehicle in mut.get_vehicle_list())
+            result = mut.manage_removal_from_game_for("dummyplayer1", RemovalReason.NONE)
+            assert result
+            assert all(vehicle.get_player_id() is None
+                    for vehicle in mut.get_vehicle_list())
 
     @pytest.mark.asyncio
     def test_for_invalid_player_id_and_reason(self, get_mut_with_endless_playing_time,
