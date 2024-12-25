@@ -806,7 +806,7 @@ class EnvironmentManager:
                 return p
         return None
 
-    def get_drivers(self) -> List[Driver]:
+    def get_drivers(self) -> list[Driver]:
         """
         Returns all Drivers of this session
         """
