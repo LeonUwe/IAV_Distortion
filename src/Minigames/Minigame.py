@@ -155,7 +155,7 @@ class Minigame:
         """
         Immediately Cancels the game without winner or loser.
         """
-        print("MINIGAQME CANCELLED")
+        logger.info(f"{self.get_name()} with players {self.get_players()} has been cancelled.")
         self._players.clear()
         self._ready_players.clear()
         self._task.cancel()
