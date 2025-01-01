@@ -29,8 +29,7 @@ class MinigameLobbyUI:
     def __init__(self,
                  sio: AsyncServer,
                  environment_mng: EnvironmentManager,
-                 behaviour_ctrl: BehaviourController,
-                 name=__name__
+                 behaviour_ctrl: BehaviourController
                  ) -> None:
         self.minigame_lobby_ui_blueprint: Blueprint = Blueprint(name='minigame_lobby_ui_blueprint_bp',
                                                                 import_name='minigame_lobby_ui_blueprint_bp')
