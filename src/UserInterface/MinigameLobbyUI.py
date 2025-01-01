@@ -163,7 +163,8 @@ class MinigameLobbyUI:
 
             await self.redirect_to_minigame_ui(*actually_playing)
 
-            self.make_vehicles_drive_continuously(*actually_playing)
+            if self.config_handler.get_configuration()['minigame']['auto_drive_constantly']:
+                self.make_vehicles_drive_continuously(*actually_playing)
 
             while not minigame_task.done() and not minigame_task.cancelled():
                 await asyncio.sleep(1)
