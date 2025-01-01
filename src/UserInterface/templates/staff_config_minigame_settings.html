@@ -3,6 +3,9 @@
 {% block content %}
 
 <div class="flexbox-item config_content">
+    <div id="restart_info" class="alert">
+        <p>Some of the configuration will only apply after a restart of IAV Distortion. Please restart after applying changes!</p>
+    </div>
     <form id="minigame_settings" action="{{ url_for('staffUI_bp.apply_minigame_settings') }}" method="post">
         <div id="general">
             <h2>General Minigame Settings</h2>
