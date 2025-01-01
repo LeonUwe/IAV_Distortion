@@ -43,22 +43,6 @@ class Minigame_Controller:
             raise Exception("No AsyncServer was provided. Cancelling the Minigame_Controller.__init__.")
         self._sio = sio
         self._config_handler: ConfigurationHandler = ConfigurationHandler()
-        try:
-            self._driving_speed_while_playing = \
-                self._config_handler.get_configuration()['minigame']['driving_speed_while_playing']
-        except KeyError:
-            logger.warning("No valid value for minigame: driving_speed_while_playing in config_file. \
-                Using default value of 30")
-            self._driving_speed_while_playing = 30
-
-        try:
-            self.__driver_heartbeat_timeout: int = int(self._config_handler.get_configuration()["driver"]
-                                                       ["driver_heartbeat_timeout_s"])
-        except KeyError:
-            logger.warning("No valid value for driver: driver_heartbeat_timeout in config_file. Using default "
-                           "value of 30 seconds")
-            self.__driver_heartbeat_timeout = 30
-
         self._minigame_uis: dict = {}
         self._available_minigames: list[str] = []
         self._minigame_instances: list[Minigame] = []
