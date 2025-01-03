@@ -24,15 +24,24 @@ class TestBotBehaviour:
             self.bot._behaviour_ctrl.request_uturn_for = AsyncMock()
 
     def test_is_player_active_true(self):
+        """
+        This tests that when the player is marked as active, the bots speed is set to 50.0
+        """
         self.bot.set_is_player_active(True)
         self.behaviour_ctrl_mock.request_speed_change_for.assert_called_with(uuid=self.vehicle_id, value_perc=50.0)
 
     def test_is_player_active_false(self):
+        """
+        This tests that when the player is marked as not active, the bots speed is set to 30.0
+        """
         self.bot.set_is_player_active(False)
         self.behaviour_ctrl_mock.request_speed_change_for.assert_called_with(uuid=self.vehicle_id, value_perc=30.0)
 
     @pytest.mark.asyncio
     async def test_drive_automatically_vehicle_none(self):
+        """
+        This tests that if the bots vehicle is set to none, the speed is still set to 30.0
+        """
         self.bot.vehicle = None
 
         await self.bot._drive_automatically()
@@ -43,6 +52,9 @@ class TestBotBehaviour:
 
     @pytest.mark.asyncio
     async def test_drive_automatically_player_active_speed(self):
+        """
+        This tests that while the player is active, the bot can change speed to a "random" value
+        """
         self.bot.is_player_active = True
         self.bot.vehicle = self.vehicle_id
 
@@ -59,6 +71,9 @@ class TestBotBehaviour:
 
     @pytest.mark.asyncio
     async def test_drive_automatically_player_active_turn_right(self):
+        """
+        This tests that while the player is active, the bot can request right lane changes
+        """
         self.bot.is_player_active = True
         self.bot.vehicle = self.vehicle_id
 
@@ -75,6 +90,9 @@ class TestBotBehaviour:
 
     @pytest.mark.asyncio
     async def test_drive_automatically_player_active_turn_left(self):
+        """
+        This tests that while the player is active, the bot can request left lane changes
+        """
         self.bot.is_player_active = True
         self.bot.vehicle = self.vehicle_id
 
@@ -91,6 +109,9 @@ class TestBotBehaviour:
 
     @pytest.mark.asyncio
     async def test_drive_automatically_player_active_uturn(self):
+        """
+        This tests that while the player is active, the bot can request a u-turn
+        """
         self.bot.is_player_active = True
         self.bot.vehicle = self.vehicle_id
 
