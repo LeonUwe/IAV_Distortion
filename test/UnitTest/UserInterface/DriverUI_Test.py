@@ -33,11 +33,9 @@ def initialise_dependencies():
     environment_manager = EnvironmentManager(fleet_ctrl, configuration_handler_mock)
     vehicles = environment_manager.get_vehicle_list()
     behaviour_ctrl = BehaviourController(vehicles)
-
     driver_ui = DriverUI(behaviour_ctrl=behaviour_ctrl, environment_mng=environment_manager, sio=socket)
 
     location_service_mock = MagicMock(spec=LocationService)
-
     vehicle: Vehicle = Vehicle('1234', location_service_mock, disable_item_removal=True)
 
     return driver_ui, environment_manager, vehicle
@@ -89,6 +87,9 @@ async def test_driver_ui_template_data_player_exists(initialise_dependencies):
 
 @pytest.mark.asyncio
 async def test_proximity_timer_increment(initialise_dependencies):
+    """
+    This tests that the proximity timer for a vehicle is incremented correctly when a car is nearby
+    """
     # Arrange
     player_1 = str(uuid.uuid4())
     player_2 = str(uuid.uuid4())
