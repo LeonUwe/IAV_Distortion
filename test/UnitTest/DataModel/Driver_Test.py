@@ -42,11 +42,8 @@ class TestScore(unittest.TestCase):
         driver.increase_score(0)
         assert driver.get_score() == 0
 
-        #driver.increase_score(-5)
-        #assert driver.get_score() == 0
-
         driver.increase_score(1_000_000)
         assert driver.get_score() == 1_000_000
 
         driver.increase_score(5_000_000)
-        assert driver.get_score() == 5_000_000
+        assert driver.get_score() == 6_000_000
