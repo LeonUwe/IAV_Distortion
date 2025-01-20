@@ -296,7 +296,9 @@ class TestManageRemovalFromGame:
     def test_for_valid_player_id_and_reason(self, get_mut_with_endless_playing_time,
                                             get_one_dummy_vehicle):
         # Arrange
-        with patch('Minigames.Minigame_Controller.Minigame_Controller.__init__', return_value=None):
+        with patch('Minigames.Minigame_Controller.Minigame_Controller.__init__', return_value=None), \
+         patch('EnvironmentManagement.EnvironmentManager.EnvironmentManager.'
+               '_EnvironmentManager__run_async_task', return_value=None):
             minigame_controller_mock = MagicMock()
             minigame_controller_mock._minigame_objects = {}
             Minigame_Controller.instance = minigame_controller_mock
@@ -544,6 +546,9 @@ def test_vehicle_cant_be_added_twice(get_two_dummy_vehicles):
 class TestSwitchCars:
 
     def test_manage_car_switch(self, get_two_dummy_player, get_two_dummy_vehicles, initialise_dependencies):
+        """
+        This tests the 'manage_car_switch_for' method to make sure it is handled correctly
+        """
         # Arrange
         fleet_mock = MagicMock(spec=FleetController)
         config_mock = MagicMock(spec=ConfigurationHandler)
@@ -568,6 +573,9 @@ class TestSwitchCars:
         assert new_vehicle == dummy_vehicle1
 
     def test_car_switch_lower_300ms(self, get_two_dummy_player, get_two_dummy_vehicles, initialise_dependencies):
+        """
+        This tests that the 'manage_car_switch_for' method is executed within 300 milliseconds
+        """
         # Arrange
         fleet_mock = MagicMock(spec=FleetController)
         config_mock = MagicMock(spec=ConfigurationHandler)
@@ -593,6 +601,9 @@ class TestSwitchCars:
         assert duration <= 0.3
 
     def test_manage_multiple_car_switch(self, get_four_dummy_players, get_four_dummy_vehicles, initialise_dependencies):
+        """
+        This tests if the 'manage_car_switch_for' method can handle multiple car switches simultaneously
+        """
         # Arrange
         fleet_mock = MagicMock(spec=FleetController)
         config_mock = MagicMock(spec=ConfigurationHandler)
@@ -620,8 +631,3 @@ class TestSwitchCars:
         assert not vehicle1 == dummy_vehicle1
         vehicle3 = env_manager.get_vehicle_by_vehicle_id(dummy_player3)
         assert not vehicle3 == dummy_vehicle3
-
-
-class TestProximityBasedTimer:
-    def test_proximity_timer_starts(self):
-        pass

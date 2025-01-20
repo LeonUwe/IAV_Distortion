@@ -43,6 +43,9 @@ class TestVehicleProximity(unittest.TestCase):
             self.car_map = CarMap(self.env_manager_mock, sio=MagicMock())
 
     def test_check_hack_vehicle_proximity(self):
+        """
+        This tests the 'check_hack_vehicle_proximity' method to make sure it can identify vehicle within proximity
+        """
         # Act
         self.car_map.check_hack_vehicle_proximity("car1", {"x": 100, "y": 100})
 
@@ -50,6 +53,9 @@ class TestVehicleProximity(unittest.TestCase):
         assert self.vehicle1.vehicle_in_proximity == "car2"
 
     def test_check_virtual_vehicle_leave_proximity(self):
+        """
+        This tests the 'check_hack_vehicle_proximity' method to make sure it can identify vehicle leaving the proximity
+        """
         # Arrange
         self.car_map.check_hack_vehicle_proximity("car1", {"x": 100, "y": 100})
         assert self.vehicle1.vehicle_in_proximity == "car2"
